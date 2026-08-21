@@ -1,0 +1,93 @@
+name: Images
+
+# Builds and pushes container images to ACR for every context:
+#   PR        -> pr-<number>-<sha>   (consumed by the Argo CD preview ApplicationSet)
+#   main      -> <sha> and main      (promoted to staging by promote.yml)
+#   tag v*    -> <version>           (promoted to production by promote.yml)
+#
+# Images are built with `az acr build`, so no registry password is ever handled
+# by the runner — auth is OIDC federated credentials.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  discover:
+    name: Discover components
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.list.outputs.components }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: List buildable components
+        id: list
+        run: |
+          set -euo pipefail
+          items='[]'
+          if [ -f web/Dockerfile ]; then
+            items=$(echo "$items" | jq -c '. + [{"name":"web","context":"web"}]')
+          fi
+          if [ -d services ]; then
+            for d in services/*/; do
+              [ -f "$d/Dockerfile" ] || continue
+              n=$(basename "$d")
+              items=$(echo "$items" | jq -c --arg n "$n" --arg c "services/$n" '. + [{"name":$n,"context":$c}]')
+            done
+          fi
+          echo "components=$items" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build ${{ matrix.component.name }}
+    needs: discover
+    if: needs.discover.outputs.components != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJSON(needs.discover.outputs.components) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image tag
+        id: tag
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "value=pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "value=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build & push to ACR
+        run: |
+          set -euo pipefail
+          extra=()
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            extra+=(--image "${{ matrix.component.name }}:main")
+          fi
+          az acr build \
+            --registry "${{ vars.ACR_NAME }}" \
+            --image "${{ matrix.component.name }}:${{ steps.tag.outputs.value }}" \
+            "${extra[@]}" \
+            --file "${{ matrix.component.context }}/Dockerfile" \
+            "${{ matrix.component.context }}"

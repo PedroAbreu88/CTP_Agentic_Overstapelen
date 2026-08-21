@@ -1,0 +1,63 @@
+name: Promote to staging
+
+# GitOps promotion: after images for a `main` commit are pushed, bump the image
+# tag in the staging overlay and commit. Argo CD sees the commit and syncs the
+# cluster — GitHub never talks to Kubernetes directly.
+
+on:
+  workflow_run:
+    workflows: [Images]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: promote-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    name: Bump staging overlay
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.MANIFESTS_TOKEN || github.token }}
+
+      - name: Install kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Set image tags
+        working-directory: deploy/overlays/staging
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          registry="${{ vars.ACR_NAME }}.azurecr.io"
+          components=$( { kustomize build . | grep -oE "image: $registry/[^:[:space:]]+" || true; } | sed "s|image: $registry/||" | sort -u)
+          if [ -z "$components" ]; then
+            echo "no images reference $registry yet — nothing to promote"; exit 0
+          fi
+          for c in $components; do
+            kustomize edit set image "$registry/$c=$registry/$c:$SHA"
+          done
+          cat kustomization.yaml
+
+      - name: Commit promotion
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet; then
+            echo "staging already at $SHA"; exit 0
+          fi
+          git commit -am "chore(deploy): promote ${SHA::7} to staging [skip ci]"
+          git push
