@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: overstapelen-previews
+  namespace: argocd
+spec:
+  # An Application is created for every open PR and deleted when the PR closes,
+  # so preview environments need no GitHub workflow at all — Argo CD owns their
+  # whole lifecycle. Each PR gets its own namespace, so concurrent agent PRs
+  # never contend for a shared environment.
+  goTemplate: true
+  goTemplateOptions: [missingkey=error]
+  generators:
+    - pullRequest:
+        github:
+          owner: PedroAbreu88
+          repo: CTP_Agentic_Overstapelen
+          tokenRef:
+            secretName: github-token
+            key: token
+        requeueAfterSeconds: 60
+        # Opt in per PR, so draft//spike PRs don't burn cluster quota.
+        filters:
+          - branchMatch: '.*'
+            labels: [preview]
+  template:
+    metadata:
+      name: 'preview-{{ .number }}'
+    spec:
+      project: overstapelen
+      source:
+        repoURL: https://github.com/PedroAbreu88/CTP_Agentic_Overstapelen.git
+        targetRevision: '{{ .head_sha }}'
+        path: deploy/overlays/preview
+        kustomize:
+          # Images built by images.yml are tagged pr-<number>-<sha>, which is
+          # exactly what this resolves to — no commit needed to deploy a preview.
+          images:
+            - 'REGISTRY/web:pr-{{ .number }}-{{ .head_sha }}'
+          namePrefix: 'pr-{{ .number }}-'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'preview-pr-{{ .number }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+  # Tear the namespace down with the Application when the PR closes.
+  templatePatch: |
+    spec:
+      syncPolicy:
+        automated:
+          prune: true

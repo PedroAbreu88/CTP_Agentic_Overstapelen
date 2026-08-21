@@ -1,0 +1,98 @@
+name: Promote to production
+
+# Production ships from an immutable tag, never from a branch.
+# The `production` GitHub Environment carries the required-reviewer gate; the
+# actual rollout is done by Argo CD once this workflow commits the new tag.
+#
+# Rollback: re-run this workflow via workflow_dispatch with a previous tag.
+# The images already exist in ACR, so it is a re-point, not a rebuild.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Existing tag to (re)deploy, e.g. v1.4.2 — use to roll back'
+        required: true
+
+concurrency:
+  group: promote-production
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  promote:
+    name: Bump production overlay
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.MANIFESTS_TOKEN || github.token }}
+
+      - name: Resolve version
+        id: version
+        run: echo "value=${{ inputs.version || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Verify images exist for this version
+        id: images
+        working-directory: deploy/overlays/production
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          set -euo pipefail
+          registry="${{ vars.ACR_NAME }}.azurecr.io"
+          components=$( { kustomize build . | grep -oE "image: $registry/[^:[:space:]]+" || true; } | sed "s|image: $registry/||" | sort -u)
+          if [ -z "$components" ]; then
+            echo "::error::production overlay references no $registry images"
+            exit 1
+          fi
+          for c in $components; do
+            if ! az acr repository show-tags --name "${{ vars.ACR_NAME }}" --repository "$c" \
+                 --query "[?@=='$VERSION']" -o tsv | grep -q "$VERSION"; then
+              echo "::error::no image $c:$VERSION in ACR — was the tag pushed before Images finished?"
+              exit 1
+            fi
+          done
+          echo "components=$(echo $components | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+
+      - name: Set image tags
+        working-directory: deploy/overlays/production
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          set -euo pipefail
+          registry="${{ vars.ACR_NAME }}.azurecr.io"
+          for c in ${{ steps.images.outputs.components }}; do
+            kustomize edit set image "$registry/$c=$registry/$c:$VERSION"
+          done
+          cat kustomization.yaml
+
+      - name: Commit promotion
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          set -euo pipefail
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet; then
+            echo "production already at $VERSION"; exit 0
+          fi
+          git commit -am "chore(deploy): promote $VERSION to production [skip ci]"
+          git push

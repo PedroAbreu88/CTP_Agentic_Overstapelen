@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: overstapelen-preview
+
+resources:
+  - ../../base
+
+# Image tags below are rewritten by the promotion workflows (staging/production)
+# or by the Argo CD ApplicationSet (preview). Do not edit them by hand.
+images: []
