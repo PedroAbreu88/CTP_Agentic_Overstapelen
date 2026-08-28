@@ -9,6 +9,18 @@ import { readFileSync } from "node:fs";
 
 const payload = JSON.parse(readFileSync(process.argv[2], "utf8"));
 
+// An API error payload has no `nodes`, so without this check the script would
+// report "no device-sized frames found" and misdiagnose a rate limit as a
+// design-file problem.
+if (payload.status && payload.status !== 200) {
+  console.error(`API error ${payload.status}: ${payload.err || "(no message)"}`);
+  process.exit(1);
+}
+if (!payload.nodes || typeof payload.nodes !== "object") {
+  console.error("Unexpected payload: no `nodes` object. Not a /v1/files/:key/nodes response?");
+  process.exit(1);
+}
+
 // Screens are the frames sized like the device. Everything larger is a
 // container or an annotation canvas; everything much smaller is a detail.
 const DEVICE_SIZES = [

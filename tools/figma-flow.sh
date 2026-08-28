@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Read UI flows from the Armscanner designs file and summarise their layout.
 #
-# Deliberately frugal with API calls: Figma's rate limit is cost-based and
-# recovers over minutes, so this makes exactly two requests — one for the page
-# list, one for the selected pages' frames.
+# Deliberately frugal with API calls: Figma's rate limit is cost-based and can
+# take hours to clear once exhausted, so this makes exactly two requests — one
+# for the page list, one for the selected pages' frames.
 #
 #   ./tools/figma-flow.sh                 # list pages, so you can pick
 #   ./tools/figma-flow.sh Picking         # summarise pages matching a pattern
@@ -76,5 +76,13 @@ console.log(hits.map(p => p.id).join(","));
 
 echo "Reading pages: $IDS" >&2
 api "files/$DESIGNS_KEY/nodes?ids=$IDS&depth=8" > "$TMP/pages.json" || exit 1
+node -e '
+const j = require(process.argv[1]);
+if (j.status && j.status !== 200) { console.error("  API " + j.status + ": " + (j.err || "")); process.exit(1); }
+' "$TMP/pages.json" || {
+  echo "Could not read those pages. A 429 here means the budget ran out between" >&2
+  echo "the two calls — Figma's limit is cost-based and can take hours to clear." >&2
+  exit 1
+}
 
 node "$(cd "$(dirname "$0")" && pwd)/figma-flow.mjs" "$TMP/pages.json"

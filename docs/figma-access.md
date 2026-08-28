@@ -144,8 +144,8 @@ exceeded"}`.
 
 The limit is **cost-based, not a simple request count**, and `GET /v1/files/:key`
 without a `depth` parameter is by far the most expensive call available. One
-full read of the designs file — 33 MB — was enough to exhaust the budget for
-**more than six minutes**, blocking even cheap follow-up calls.
+full read of the designs file — 33 MB — exhausted the budget for **over two
+hours**, blocking even cheap follow-up calls.
 
 Practical consequences:
 
