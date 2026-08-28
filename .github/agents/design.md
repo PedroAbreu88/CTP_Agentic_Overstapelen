@@ -52,11 +52,25 @@ Armscanner-specific components, and some sets exist in more than one family.
 Prefer the family already used by the flow you are extending, and say which you
 chose and why.
 
-**Never propose anything marked `[OLD]`.** The extract lists them explicitly.
+**Never propose anything retired.** Two markers mean the same thing — do not
+use:
 
-**Do not interpret ❌ page marks.** They may mean "do not use", "not yet
-reviewed", or "being replaced". Surface the ambiguity; do not resolve it
-yourself.
+- Component sets named `[OLD]`.
+- Anything on a library page marked `❌`. Confirmed with design: ❌ means no
+  longer applicable. The extract flags these as `[RETIRED]`.
+
+The retirements have a logic worth understanding rather than memorising:
+**standalone form controls are out, list-item and numpad equivalents are in.**
+A bare checkbox is a small target needing precise aim; a full-width list row is
+a large one. Free text is impractical with gloves, so numeric entry goes through
+a numpad. Use `List Item / Checkbox` and `List Item / Radio` over
+`Input / Checkbox` and `Input / Radio`, and `Numpad / Inputfield` over
+`Inputfield`.
+
+**A missing ✅ is not a prohibition.** Only three pages carry a tick and most
+carry no mark. Unmarked components are usable; they have simply not been through
+the same review. Do not treat absence of a tick as a reason to avoid something,
+and do not treat it as endorsement either.
 
 **Reuse the domain vocabulary.** The library already models this world:
 `Crate - Nadine`, `Load Carrier`, `EOPK cart`, `Crate/Coolbox confirmation`,

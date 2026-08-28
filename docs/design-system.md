@@ -45,21 +45,36 @@ which you picked and why. If in doubt, ask design rather than guessing.
 
 ## Page marks — ✅ and ❌
 
-Designers annotate library pages with tick and cross emoji. These are
-**preserved verbatim and deliberately not interpreted**, because their meaning
-is not recorded anywhere in the file.
+Designers annotate library pages with tick and cross emoji.
 
-| Mark | Pages |
+**❌ means no longer applicable. Do not propose anything on a ❌ page.**
+Confirmed with the team — this is a hard rule, equivalent to `[OLD]`.
+
+| Mark | Meaning | Pages |
+| --- | --- | --- |
+| ❌ | **Retired — do not use** | `-> Checkbox & radiobutton ❌`, `-> Input field ❌`, `-> Divider ❌` |
+| ✅ | Reviewed and approved | `-> Button bar ✅`, `✅ Header`, `-> Volume toggle ✅` |
+| none | 29 pages | Usable, but not explicitly reviewed. |
+
+Note the asymmetry: ❌ is a confirmed prohibition, but the absence of a ✅ is
+**not** an endorsement — most pages carry no mark at all. Treat unmarked
+components as usable while remembering they have not been through the same
+review as the ticked ones.
+
+### What replaced the retired components
+
+The retirements follow a consistent logic, and it is worth understanding
+rather than memorising: **standalone form controls are out; list-item and
+numpad equivalents are in.** On an arm scanner a bare checkbox is a small
+target needing precise aim, while a full-width list row is a large one — and
+free text entry is impractical with gloves, so numeric entry goes through a
+numpad.
+
+| Retired | Use instead |
 | --- | --- |
-| ✅ | `-> Button bar ✅`, `✅ Header`, `-> Volume toggle ✅` |
-| ❌ | `-> Checkbox & radiobutton ❌`, `-> Input field ❌`, `-> Divider ❌` |
-| unmarked | 29 pages |
-
-**Do not guess what ❌ means.** It could mean "do not use", "not yet
-reviewed", or "being replaced" — and those imply very different things for a
-proposal. Treat a ❌ page as a question for design, not as a prohibition and
-not as a green light. Most pages carry no mark at all, so absence of a tick
-says nothing.
+| `Input / Checkbox`, `Input / Radio` | `List Item / Checkbox`, `List Item / Radio` |
+| `Inputfield`, `Number input`, `Input - Text - Nadine`, `Inputfield Listitem I` | `Numpad`, `Numpad - Pantry`, `Numpad / Inputfield` |
+| `Divider` | No direct replacement identified — separation appears to be handled inside list-item components. Confirm with design. |
 
 ## Deprecated — do not use
 
@@ -154,11 +169,11 @@ Grouped by library page. Variant names are the axes you choose along
 - **Call out - feedback - Nadine** _(Nadine)_ — 6 variants
   - `Size=Small, Feedback=Negative`, `Size=Small, Feedback=Information`, `Size=Large, Feedback=Warning`, `Size=Small, Feedback=Warning`, `Size=Large, Feedback=Information`, `Size=Large, Feedback=Negative`
 
-### -> Checkbox & radiobutton ❌ — ❌ marked; confirm with design before using
+### -> Checkbox & radiobutton ❌ — ❌ RETIRED, do not propose
 
-- ** Input / Checkbox** — 4 variants
+- ** Input / Checkbox** **[RETIRED]** — 4 variants
   - `Selected=True, State=Default`, `Selected=True, State=Down`, `Selected=False, State=Default`, `Selected=False, State=Down`
-- ** Input / Radio** — 4 variants
+- ** Input / Radio** **[RETIRED]** — 4 variants
   - `Selected=False, State=Down`, `Selected=True, State=Down`, `Selected=False, State=Default`, `Selected=True, State=Default`
 
 ### -> Counter
@@ -197,9 +212,9 @@ Grouped by library page. Variant names are the axes you choose along
 - **Product info** — 1 variant
   - `Modal dialog - product info`
 
-### -> Divider ❌ — ❌ marked; confirm with design before using
+### -> Divider ❌ — ❌ RETIRED, do not propose
 
-- **(ungrouped)** — 1 variant
+- **(ungrouped)** **[RETIRED]** — 1 variant
   - ` Divider`
 
 ### -> Header
@@ -226,15 +241,15 @@ Grouped by library page. Variant names are the axes you choose along
 - **Scan** — 2 variants
   - `Size=160`, `Size=120`
 
-### -> Input field ❌ — ❌ marked; confirm with design before using
+### -> Input field ❌ — ❌ RETIRED, do not propose
 
-- ** Inputfield** — 3 variants
+- ** Inputfield** **[RETIRED]** — 3 variants
   - `Type=Focus`, `Type=Filled`, `Type=Inactive`
-- **(ungrouped)** — 1 variant
+- **(ungrouped)** **[RETIRED]** — 1 variant
   - `Number input`
-- **Input - Text - Nadine** _(Nadine)_ — 1 variant
+- **Input - Text - Nadine** **[RETIRED]** — 1 variant
   - `🧬 Input - Text`
-- **Inputfield Listitem I** — 2 variants
+- **Inputfield Listitem I** **[RETIRED]** — 2 variants
   - `State=Inactive`, `State=Default`
 
 ### -> List item

@@ -123,6 +123,9 @@ Practical consequences:
 - Fetch each endpoint once and reuse the response from disk.
 - If you are already rate-limited, waiting a minute is not enough. Expect
   several minutes, and do not retry in a tight loop — retries make it worse.
+- **The buckets are per-endpoint.** `/components` and `/styles` kept working
+  normally while `GET /v1/files/:key` was still returning `429` twenty minutes
+  later. If one endpoint is blocked, the others may well not be.
 - Prefer reading `docs/design-system.md`, which needs no API call at all.
 
 ## Failure modes

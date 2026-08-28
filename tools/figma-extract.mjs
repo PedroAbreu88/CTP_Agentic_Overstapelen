@@ -35,11 +35,10 @@ const provenance = (name) => {
   return "Armscanner";
 };
 
-// Designers mark library pages with ✅ / ❌. The marks are a real curation
-// signal and are preserved verbatim rather than interpreted — see the caveat
-// printed below.
+// Designers mark library pages with ✅ / ❌. Confirmed with the team: ❌ means
+// no longer applicable — those components must not be proposed.
 const pageMark = (page) =>
-  /✅/.test(page) ? "approved" : /❌/.test(page) ? "flagged" : "unmarked";
+  /✅/.test(page) ? "approved" : /❌/.test(page) ? "retired" : "unmarked";
 
 const byPage = new Map();
 for (const s of sets.values()) {
@@ -102,26 +101,42 @@ p();
 
 p("## Page marks — ✅ and ❌");
 p();
-p("Designers annotate library pages with tick and cross emoji. These are");
-p("**preserved verbatim and deliberately not interpreted**, because their meaning");
-p("is not recorded anywhere in the file.");
+p("Designers annotate library pages with tick and cross emoji.");
 p();
-const marked = { approved: [], flagged: [] };
+p("**❌ means no longer applicable. Do not propose anything on a ❌ page.**");
+p("Confirmed with the team — this is a hard rule, equivalent to `[OLD]`.");
+p();
+const marked = { approved: [], retired: [] };
 for (const page of byPage.keys()) {
   const m = pageMark(page);
   if (m !== "unmarked") marked[m].push(page.trim());
 }
-p("| Mark | Pages |");
-p("| --- | --- |");
-p(`| ✅ | ${marked.approved.length ? marked.approved.map((x) => `\`${x}\``).join(", ") : "—"} |`);
-p(`| ❌ | ${marked.flagged.length ? marked.flagged.map((x) => `\`${x}\``).join(", ") : "—"} |`);
-p(`| unmarked | ${byPage.size - marked.approved.length - marked.flagged.length} pages |`);
+p("| Mark | Meaning | Pages |");
+p("| --- | --- | --- |");
+p(`| ❌ | **Retired — do not use** | ${marked.retired.length ? marked.retired.map((x) => `\`${x}\``).join(", ") : "—"} |`);
+p(`| ✅ | Reviewed and approved | ${marked.approved.length ? marked.approved.map((x) => `\`${x}\``).join(", ") : "—"} |`);
+p(`| none | ${byPage.size - marked.approved.length - marked.retired.length} pages | Usable, but not explicitly reviewed. |`);
 p();
-p("**Do not guess what ❌ means.** It could mean \"do not use\", \"not yet");
-p("reviewed\", or \"being replaced\" — and those imply very different things for a");
-p("proposal. Treat a ❌ page as a question for design, not as a prohibition and");
-p("not as a green light. Most pages carry no mark at all, so absence of a tick");
-p("says nothing.");
+p("Note the asymmetry: ❌ is a confirmed prohibition, but the absence of a ✅ is");
+p("**not** an endorsement — most pages carry no mark at all. Treat unmarked");
+p("components as usable while remembering they have not been through the same");
+p("review as the ticked ones.");
+p();
+
+p("### What replaced the retired components");
+p();
+p("The retirements follow a consistent logic, and it is worth understanding");
+p("rather than memorising: **standalone form controls are out; list-item and");
+p("numpad equivalents are in.** On an arm scanner a bare checkbox is a small");
+p("target needing precise aim, while a full-width list row is a large one — and");
+p("free text entry is impractical with gloves, so numeric entry goes through a");
+p("numpad.");
+p();
+p("| Retired | Use instead |");
+p("| --- | --- |");
+p("| `Input / Checkbox`, `Input / Radio` | `List Item / Checkbox`, `List Item / Radio` |");
+p("| `Inputfield`, `Number input`, `Input - Text - Nadine`, `Inputfield Listitem I` | `Numpad`, `Numpad - Pantry`, `Numpad / Inputfield` |");
+p("| `Divider` | No direct replacement identified — separation appears to be handled inside list-item components. Confirm with design. |");
 p();
 
 p("## Deprecated — do not use");
@@ -145,12 +160,19 @@ p();
 for (const page of [...byPage.keys()].sort()) {
   const list = byPage.get(page).sort((a, b) => a.name.localeCompare(b.name));
   const mark = pageMark(page);
-  const note = mark === "flagged" ? " — ❌ marked; confirm with design before using" : "";
+  const note = mark === "retired" ? " — ❌ RETIRED, do not propose" : "";
   p(`### ${page.trim()}${note}`);
   p();
   for (const s of list) {
     const fam = provenance(s.name);
-    const tag = fam === "deprecated" ? " **[DEPRECATED]**" : fam === "Armscanner" ? "" : ` _(${fam})_`;
+    const retired = mark === "retired";
+    const tag = retired
+      ? " **[RETIRED]**"
+      : fam === "deprecated"
+        ? " **[DEPRECATED]**"
+        : fam === "Armscanner"
+          ? ""
+          : ` _(${fam})_`;
     p(`- **${s.name}**${tag} — ${s.variants.length} variant${s.variants.length === 1 ? "" : "s"}`);
     if (s.description) p(`  - ${s.description}`);
     const sample = [...new Set(s.variants)].slice(0, 6);
