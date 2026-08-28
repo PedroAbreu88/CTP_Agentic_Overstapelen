@@ -53,6 +53,14 @@ From `docs/product-context.md` and `docs/ci-cd.md`:
 - **Gloves, cold, speed.** Flag UI that assumes hover, fine pointing, dense
   information, sustained attention, or two free hands — the device is worn on
   the arm and the operator is lifting crates.
+- **Retired design components.** Flag any use of a component that
+  `docs/design-system.md` marks `[OLD]` or `[RETIRED]` — the latter covers
+  Figma pages marked `❌`, which design has confirmed means no longer
+  applicable. In particular `Input / Checkbox`, `Input / Radio`, `Inputfield`
+  and `Divider` are retired in favour of `List Item / Checkbox`,
+  `List Item / Radio` and `Numpad / Inputfield`.
+- **Raw colour or font values in UI code** where a semantic token exists. A hex
+  code cannot follow the design system when it changes.
 - **No secrets in the repository**, and no registry passwords — ACR access is
   OIDC.
 

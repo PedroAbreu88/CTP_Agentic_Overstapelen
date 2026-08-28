@@ -46,14 +46,22 @@ change makes the operator hunt for a specific crate, it is wrong.
 ## Designs
 
 The UI designs live in Figma: **Armscanner — UI designs**, file key
-`XMc8Glk3X9V3xh1uEiYoRe`.
+`XMc8Glk3X9V3xh1uEiYoRe`. Components come from a separate published library,
+**Armscanner - Library**, file key `nsgOZTtYiHjPOxrt1ImVHv`.
 
 <https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs>
 
-Treat that file as the source of truth for layout, component usage and
-interaction patterns, and prefer reading it over inventing a UI. Reading it
-needs a Figma token — see `docs/figma-access.md`, which also explains why this
-project uses the REST API rather than the Figma MCP server.
+**Read `docs/design-system.md` before building UI.** It is a generated inventory
+of the library's 643 published components and 167 semantic tokens, and it needs
+no Figma token. Name components and tokens from it rather than inventing them,
+and never use anything it marks `[OLD]`.
+
+The screen is **534×320 logical** (800×480 at 1.5×) on the smaller target, and
+landscape. Design for that one.
+
+For the designs themselves, or anything the inventory does not cover, see
+`docs/figma-access.md` — which also explains why this project uses the REST API
+rather than the Figma MCP server.
 
 ## Working agreement
 
