@@ -92,6 +92,9 @@ designs.
   overstapelen both hands are lifting crates. The operator glances at the
   screen between lifts rather than holding and reading it. Interaction must be
   minimal, glanceable, and survivable one-handed at best.
+- **The screen is small and landscape.** Two targets, per the designs:
+  **800×480 at 1.5×** (534×320 logical) and **1280×720 at 2×** (640×360
+  logical). Design for the smaller. The hardware is Zebra WT6300 / WT6400.
 - **Scanning happens with gloves, in the cold, at speed.** This is not a desktop
   application, and it is not a phone app used at leisure.
 
@@ -124,8 +127,11 @@ These block a meaningful estimate. None should be answered from a desk.
 | --- | --- |
 | Draft solution proposal | [Confluence — Solution proposal (Agentic)](https://confluence-aholddelhaize.atlassian.net/wiki/spaces/CTPBOFAFFL/pages/151013721984/Solution+proposal+Agentic) |
 | UI designs | [Figma — Armscanner UI designs](https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs) (file key `XMc8Glk3X9V3xh1uEiYoRe`) |
+| Component library | [Figma — Armscanner Library](https://www.figma.com/design/nsgOZTtYiHjPOxrt1ImVHv/) (file key `nsgOZTtYiHjPOxrt1ImVHv`) — 643 published components |
+| Design system inventory | `docs/design-system.md` |
 | Confluence space | `CTPBOFAFFL` |
 | How to read/write Confluence | `docs/confluence-access.md` |
+| How to read Figma | `docs/figma-access.md` |
 | Delivery and environments | `docs/ci-cd.md` |
 | Agent working conventions | `AGENTS.md` |
 | Agent split and review gate | `docs/agent-operating-model.md` |

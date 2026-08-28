@@ -5,8 +5,8 @@ Contains **no credentials** — every developer supplies their own token.
 
 ## Quickstart
 
-`tools/figma-read.sh` does the reading. It never takes the token as an argument
-and never prints it.
+Two scripts live in `tools/`. Neither takes the token as an argument, and
+neither prints it.
 
 ```bash
 # Validate the token only — the cheapest check that access works
@@ -14,19 +14,44 @@ and never prints it.
 
 # Read a file: pages, published components, published styles
 ./tools/figma-read.sh XMc8Glk3X9V3xh1uEiYoRe
+
+# Regenerate docs/design-system.md from the component library
+./tools/figma-extract.sh
+
+# Is the committed extract still current?
+./tools/figma-extract.sh --check
 ```
 
 Exit codes: `2` when no token is found, `3` when `curl` or `node` is missing,
 `1` on an API or transport failure.
 
-## The file
+For the component vocabulary, prefer `docs/design-system.md` over either
+script: it is committed, needs no token, and costs no API call.
 
-| Property | Value |
-| --- | --- |
-| File | **Armscanner — UI designs** |
-| File key | `XMc8Glk3X9V3xh1uEiYoRe` |
-| URL | <https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs> |
-| VPN required | No — `api.figma.com` is reachable from the public internet |
+## The files
+
+There are **two**, and the distinction matters — reading the wrong one is the
+most likely way to conclude there is no design system.
+
+| | Designs | Library |
+| --- | --- | --- |
+| Name | Armscanner - UI designs | Armscanner - Library |
+| File key | `XMc8Glk3X9V3xh1uEiYoRe` | `nsgOZTtYiHjPOxrt1ImVHv` |
+| Contains | 38 pages of flows | 643 published components, 167 styles |
+| Published components | **0** | 643 |
+
+The designs file **consumes** the library: ~6,800 `INSTANCE` nodes and only 3
+local components. So `/v1/files/XMc8.../components` returns an empty list, which
+looks like a permissions failure but is not — the components are simply defined
+elsewhere.
+
+There is also a **Mobile Library** (`W1JNpZc1GCD2bw8lkwswss`, 663 components)
+referenced by a handful of components. Armscanner is the relevant one.
+
+Do not read either file to learn the component vocabulary — read
+`docs/design-system.md`, which is generated from the library and needs no token.
+
+VPN is not required; `api.figma.com` is reachable from the public internet.
 
 The file key is the segment after `/design/` in the URL. Every REST call needs
 it.
@@ -95,11 +120,38 @@ reasons.
 
 Two traps in that table:
 
-- **`/components` and `/styles` return only *published* library items.** A file
-  full of local components that were never published to a library will return an
-  empty list, which looks like a permissions problem but is not.
+- **`/components` and `/styles` return only *published* library items.** The
+  designs file returns an empty list for both, because it consumes a library
+  rather than defining one. That is not a permissions problem — query the
+  library file key instead.
 - **Node IDs change form.** The browser URL uses `node-id=17-3` with a hyphen;
   the API expects `17:3` with a colon.
+
+A third, learned the expensive way: **the full designs file is 33 MB.** Never
+`GET /v1/files/:key` without `depth`, and never commit the result. Use
+`?depth=1` for structure, or `/nodes?ids=` for a specific subtree.
+
+## Rate limits
+
+Figma rate-limits aggressively and returns `{"status":429,"err":"Rate limit
+exceeded"}`.
+
+The limit is **cost-based, not a simple request count**, and `GET /v1/files/:key`
+without a `depth` parameter is by far the most expensive call available. One
+full read of the designs file — 33 MB — was enough to exhaust the budget for
+**more than six minutes**, blocking even cheap follow-up calls.
+
+Practical consequences:
+
+- Always pass `?depth=1`, or use `/nodes?ids=`, unless you genuinely need the
+  entire tree. You almost never do.
+- Fetch each endpoint once and reuse the response from disk.
+- If you are already rate-limited, waiting a minute is not enough. Expect
+  several minutes, and do not retry in a tight loop — retries make it worse.
+- **The buckets are per-endpoint.** `/components` and `/styles` kept working
+  normally while `GET /v1/files/:key` was still returning `429` twenty minutes
+  later. If one endpoint is blocked, the others may well not be.
+- Prefer reading `docs/design-system.md`, which needs no API call at all.
 
 ## Failure modes
 
@@ -109,7 +161,8 @@ Two traps in that table:
 | `403` on a file | The token is valid but that account cannot see the file. |
 | `404` on a file | Wrong file key — check for a copied URL fragment or a `branch` key. |
 | `403` on `/variables/local` | Not Enterprise. Derive tokens from published styles instead. |
-| Empty `components` list | Nothing is published, rather than nothing existing. |
+| Empty `components` list | Wrong file — you queried the designs file, not the library. |
+| `429 Rate limit exceeded` | Too many calls in a short window. Wait a minute; cache responses. |
 
 ## What the designs are for
 
