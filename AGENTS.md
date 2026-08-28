@@ -18,6 +18,35 @@ A previous session's chat history is **not** a substitute for these documents. I
 is machine-local, unreadable by teammates, and full of superseded reasoning. If
 something is worth carrying forward, write it into `docs/` instead.
 
+## Wait for an explicit request
+
+**Do not start work that was not explicitly asked for.** Reading, searching, and
+summarising to build context is always fine. Creating files, editing code,
+filing issues, opening PRs, and committing are not — those need a request.
+
+This applies with full force when a repository looks unfinished. A documented
+backlog is not an instruction. `docs/ci-cd.md` § *Still to do*, the open
+questions in `docs/product-context.md`, and any ADR marked *Proposed* are
+records of known gaps, deliberately left open. Finding them is not the same as
+being asked to close them.
+
+When the next step is unclear, the correct move is to present scored options
+(see below) and stop. Ending a turn with a question is a valid outcome, not a
+failure to deliver.
+
+Two specific traps, both seen in practice:
+
+- **Autonomous or autopilot mode is not blanket authorisation.** It governs *how*
+  work proceeds once a task is agreed — without check-ins on every step — not
+  *whether* there is a task. Absent an agreed task, stop and ask.
+- **"The user is unavailable, use your judgement" is not agreement.** Good
+  judgement in that position usually means reporting findings and waiting, not
+  picking a direction unilaterally. Prefer the reversible action; prefer no
+  action over an unrequested one.
+
+If in doubt: **ask, don't act.** An unwanted change costs more to unpick than a
+question costs to answer.
+
 ## Presenting options and proposals
 
 Whenever you present options, proposals, approaches, or trade-offs, score **every**
