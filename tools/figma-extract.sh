@@ -62,7 +62,7 @@ fetch() { # fetch <path> <outfile>
 echo "Fetching library metadata..."
 fetch "files/$LIBRARY_KEY?depth=1" "$TMP/meta.json" || {
   echo "Could not read the library. If this was a 429, Figma's limit is" >&2
-  echo "cost-based — expect to wait several minutes, not seconds." >&2
+  echo "cost-based and can take hours to clear once exhausted." >&2
   exit 1
 }
 
