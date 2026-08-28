@@ -130,7 +130,9 @@ These block a meaningful estimate. None should be answered from a desk.
 | Component library | [Figma — Armscanner Library](https://www.figma.com/design/nsgOZTtYiHjPOxrt1ImVHv/) (file key `nsgOZTtYiHjPOxrt1ImVHv`) — 643 published components |
 | Design system inventory | `docs/design-system.md` |
 | Confluence space | `CTPBOFAFFL` |
+| Jira project | `AODB` — CTP Cluster - eCommerce Backoffice, on `jira-eu-aholddelhaize.atlassian.net` |
 | How to read/write Confluence | `docs/confluence-access.md` |
+| How to read/write Jira | `docs/jira-access.md` |
 | How to read Figma | `docs/figma-access.md` |
 | Delivery and environments | `docs/ci-cd.md` |
 | Agent working conventions | `AGENTS.md` |

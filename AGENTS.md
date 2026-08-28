@@ -12,6 +12,7 @@ expensive to acquire and is not recoverable from the code alone.
 | [`docs/product-context.md`](docs/product-context.md) | **Always, first.** What the Stack App is, the Dutch domain glossary, the two phases, and what is still undecided. Without it the repository does not explain its own purpose. |
 | [`docs/ci-cd.md`](docs/ci-cd.md) | Touching delivery, environments, or anything deployed. Also documents constraints that shape application design. |
 | [`docs/confluence-access.md`](docs/confluence-access.md) | Before any Confluence call. Documents non-obvious failure modes that otherwise cost a long debugging cycle. |
+| [`docs/jira-access.md`](docs/jira-access.md) | Before any Jira call. Jira is on a **different Atlassian site** from Confluence; the doc also covers the project key and the two mandatory custom fields. |
 | [`docs/figma-access.md`](docs/figma-access.md) | Before reading the UI designs. Covers the file key, why we use the REST API rather than the MCP server, and the traps in the components/styles endpoints. |
 | [`docs/design-system.md`](docs/design-system.md) | Before proposing or building any UI. Generated inventory of the Armscanner Figma library — component sets, variants and semantic tokens. |
 | [`docs/decisions/`](docs/decisions/) | Before revisiting a settled architectural choice, and when making one worth recording. |
