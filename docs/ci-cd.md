@@ -81,8 +81,16 @@ federated credentials for `pull_request`, `ref:refs/heads/main` and
 GitHub **Environments**: `staging` and `production`, with required reviewers on
 `production` only.
 
-Branch protection on `main`: require the aggregate **CI** check, require a PR,
-disallow direct pushes.
+Branch protection on `main`: **applied.** Requires a PR, requires the aggregate
+**CI** check, strict (branch must be up to date), linear history, no force
+pushes or deletions, conversation resolution required, and **administrators
+included**. Required approvals are deliberately `0`. A repository ruleset also
+requests an automatic Copilot code review on every PR into `main`.
+
+The reasoning behind the two counter-intuitive settings — zero approvals, and
+why excluding administrators makes the whole gate cosmetic — is in
+[`docs/agent-operating-model.md`](agent-operating-model.md). Read it before
+changing either.
 
 ## Still to do
 
