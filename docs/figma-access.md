@@ -15,6 +15,12 @@ neither prints it.
 # Read a file: pages, published components, published styles
 ./tools/figma-read.sh XMc8Glk3X9V3xh1uEiYoRe
 
+# List the pages in the designs file
+./tools/figma-flow.sh
+
+# Summarise a flow's screens: layout regions, components used, on-screen text
+./tools/figma-flow.sh Picking
+
 # Regenerate docs/design-system.md from the component library
 ./tools/figma-extract.sh
 
@@ -138,19 +144,22 @@ exceeded"}`.
 
 The limit is **cost-based, not a simple request count**, and `GET /v1/files/:key`
 without a `depth` parameter is by far the most expensive call available. One
-full read of the designs file — 33 MB — was enough to exhaust the budget for
-**more than six minutes**, blocking even cheap follow-up calls.
+full read of the designs file — 33 MB — exhausted the budget for **over two
+hours**, blocking even cheap follow-up calls.
 
 Practical consequences:
 
 - Always pass `?depth=1`, or use `/nodes?ids=`, unless you genuinely need the
   entire tree. You almost never do.
 - Fetch each endpoint once and reuse the response from disk.
-- If you are already rate-limited, waiting a minute is not enough. Expect
-  several minutes, and do not retry in a tight loop — retries make it worse.
-- **The buckets are per-endpoint.** `/components` and `/styles` kept working
-  normally while `GET /v1/files/:key` was still returning `429` twenty minutes
-  later. If one endpoint is blocked, the others may well not be.
+- **Recovery is much slower than the wording suggests.** One undepthed `GET
+  /v1/files/:key` on the 33 MB designs file left that endpoint returning `429`
+  for **over two hours**, and repeated retries appeared to extend it rather
+  than shorten it. Treat a 429 as "come back later", not "wait and retry".
+- **The buckets are per-endpoint, but they are not independent.** `/components`
+  and `/styles` kept working while `/v1/files/:key` was blocked — but enough
+  calls to `/nodes` exhausted that bucket too. Budget the whole session, not
+  each endpoint.
 - Prefer reading `docs/design-system.md`, which needs no API call at all.
 
 ## Failure modes
