@@ -26,8 +26,9 @@ it. You are not creating it, and you do not master it.
 ## Constraints you cannot design around
 
 - **APIs are additive-only and versioned.** The Android app cannot be rolled
-  back and old versions stay on handhelds for weeks. A breaking change strands
-  devices on the warehouse floor. Never remove or repurpose a field; add.
+  back and old versions stay on arm scanners for weeks. A breaking change
+  strands devices on the warehouse floor. Never remove or repurpose a field;
+  add.
 - **Database changes follow expand → migrate → contract**, via Flyway. Never a
   destructive change in a single release.
 - **Oracle is read, never mastered.** The Stack App holds no master data of its

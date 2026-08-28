@@ -81,20 +81,26 @@ designs.
 
 - **The Android app cannot be rolled back.** It ships through Play Store review
   and old versions stay installed on devices for weeks. APIs must be
-  **additive-only and versioned**; a breaking change strands handhelds on the
+  **additive-only and versioned**; a breaking change strands arm scanners on the
   warehouse floor.
 - **Database changes follow expand → migrate → contract** (Flyway). Never a
   destructive change in a single release.
 - **The floor does not stop.** If the app is unavailable, a defined fallback must
   already be agreed with Operations. Operators cannot wait for a fix.
-- **Scanning happens with gloves, in the cold, at speed.** The UI must be
-  readable at arm's length in a hurry. This is not a desktop application.
+- **The target device is an arm scanner, not a handheld and not a delivery
+  device.** It is worn on the operator's arm, which is the whole point: during
+  overstapelen both hands are lifting crates. The operator glances at the
+  screen between lifts rather than holding and reading it. Interaction must be
+  minimal, glanceable, and survivable one-handed at best.
+- **Scanning happens with gloves, in the cold, at speed.** This is not a desktop
+  application, and it is not a phone app used at leisure.
 
 ## Platform
 
-React + Capacitor Android app on warehouse handhelds, Kotlin backend services,
-PostgreSQL for app state, existing Oracle data read but never mastered here,
-Argo CD GitOps onto KaaS, images in ACR. Full detail in `docs/ci-cd.md`.
+React + Capacitor Android app on **arm-mounted warehouse scanners**, Kotlin
+backend services, PostgreSQL for app state, existing Oracle data read but never
+mastered here, Argo CD GitOps onto KaaS, images in ACR. Full detail in
+`docs/ci-cd.md`.
 
 ## Open questions
 
@@ -117,10 +123,12 @@ These block a meaningful estimate. None should be answered from a desk.
 | Artefact | Location |
 | --- | --- |
 | Draft solution proposal | [Confluence — Solution proposal (Agentic)](https://confluence-aholddelhaize.atlassian.net/wiki/spaces/CTPBOFAFFL/pages/151013721984/Solution+proposal+Agentic) |
+| UI designs | [Figma — Armscanner UI designs](https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs) (file key `XMc8Glk3X9V3xh1uEiYoRe`) |
 | Confluence space | `CTPBOFAFFL` |
 | How to read/write Confluence | `docs/confluence-access.md` |
 | Delivery and environments | `docs/ci-cd.md` |
 | Agent working conventions | `AGENTS.md` |
+| Agent split and review gate | `docs/agent-operating-model.md` |
 
 Confluence is the system of record for the proposal itself. This file exists so
 the repository can explain its own purpose without a network call.

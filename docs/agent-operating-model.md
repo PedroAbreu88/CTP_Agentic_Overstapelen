@@ -22,7 +22,7 @@ what it must *not* touch.
 
 | Agent | Owns | Cannot design around |
 | --- | --- | --- |
-| **web** | `web/` — React + Capacitor handheld app | The Android app cannot be rolled back; gloves, cold, speed, arm's length |
+| **web** | `web/` — React + Capacitor arm-scanner app | The Android app cannot be rolled back; worn on the arm, gloves, cold, hands full of crates |
 | **services** | `services/<name>/` — Kotlin, PostgreSQL, Oracle reads | Additive-only versioned APIs; expand → migrate → contract; Oracle never mastered |
 | **platform** | `deploy/`, `.github/workflows/` | Git is the only path to the cluster; production ships from an immutable tag |
 | **pr-reviewer** | Nothing — read-only | Reports high-confidence defects only; noise costs more than it looks |
@@ -34,7 +34,7 @@ both depend on, and therefore the only place they can silently diverge.
 
 The rule: **services moves first, additively, and tells web.** Web never changes
 its side of the contract unilaterally. This follows from the rollback
-constraint rather than from taste — handhelds run old builds for weeks, so the
+constraint rather than from taste — arm scanners run old builds for weeks, so the
 service must satisfy several client versions at once.
 
 ## Sequencing
