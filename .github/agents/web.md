@@ -52,7 +52,8 @@ The UI designs live in Figma: **Armscanner — UI designs**, file key
 
 Treat that file as the source of truth for layout, component usage and
 interaction patterns, and prefer reading it over inventing a UI. Reading it
-needs a Figma token — see `docs/figma-access.md` if present, otherwise ask.
+needs a Figma token — see `docs/figma-access.md`, which also explains why this
+project uses the REST API rather than the Figma MCP server.
 
 ## Working agreement
 
