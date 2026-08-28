@@ -13,6 +13,7 @@ expensive to acquire and is not recoverable from the code alone.
 | [`docs/ci-cd.md`](docs/ci-cd.md) | Touching delivery, environments, or anything deployed. Also documents constraints that shape application design. |
 | [`docs/confluence-access.md`](docs/confluence-access.md) | Before any Confluence call. Documents non-obvious failure modes that otherwise cost a long debugging cycle. |
 | [`docs/decisions/`](docs/decisions/) | Before revisiting a settled architectural choice, and when making one worth recording. |
+| [`docs/agent-operating-model.md`](docs/agent-operating-model.md) | Before starting component work, or when deciding which agent should do something. Defines the `web` / `services` / `platform` split, the shared API seam, and how review works. |
 
 A previous session's chat history is **not** a substitute for these documents. It
 is machine-local, unreadable by teammates, and full of superseded reasoning. If
