@@ -162,7 +162,7 @@ Practical consequences:
 | `404` on a file | Wrong file key — check for a copied URL fragment or a `branch` key. |
 | `403` on `/variables/local` | Not Enterprise. Derive tokens from published styles instead. |
 | Empty `components` list | Wrong file — you queried the designs file, not the library. |
-| `429 Rate limit exceeded` | Too many calls in a short window. Wait a minute; cache responses. |
+| `429 Rate limit exceeded` | Cost-based limit exhausted. Expect several minutes, not seconds — and note the buckets are per-endpoint. See [Rate limits](#rate-limits). |
 
 ## What the designs are for
 
