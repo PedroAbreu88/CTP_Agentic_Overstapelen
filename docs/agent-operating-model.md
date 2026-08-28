@@ -51,21 +51,59 @@ boundaries above.
 Review capacity — not code production — is the binding constraint. Adding
 building agents without addressing it deepens a queue rather than shortening it.
 
-The gate on `main`:
+The gate on `main`, as applied:
 
-- **A pull request is required.** No direct pushes.
-- **The aggregate `CI` check must pass.** `ci.yml` exposes a single `CI` status
-  regardless of which components a PR touches, precisely so branch protection
-  can require one thing.
-- **Approvals are deliberately not required.** This repository is personally
-  owned with a single collaborator, and the team named in `CODEOWNERS`
-  (`@RoyalAholdDelhaize/technl-ctp-team-devices-apps`) has no access to it.
-  Requiring approvals would deadlock every PR, including an agent's, because
-  nobody can approve their own work.
+| Setting | Value | Why |
+| --- | --- | --- |
+| Require a pull request | on | No direct pushes, including from agents. |
+| Required status check | `CI` | `ci.yml` exposes one aggregate status regardless of which components a PR touches, precisely so protection can require a single thing. |
+| Strict (branch up to date) | on | A PR cannot merge against a stale `main`. |
+| Required approvals | **0** | See below — any other value deadlocks. |
+| Require code owner review | off | See below. |
+| Include administrators | **on** | See below — this is the setting that makes the rest real. |
+| Force pushes / deletions | off | `main` history is the deployment audit trail. |
+| Linear history | on | Promotion commits stay readable. |
+| Conversation resolution | on | Review findings cannot be merged past silently. |
 
-That last point is why **pr-reviewer** matters more than it first appears. With
-human approval unenforceable, automated review is the judgement layer in front
-of the CI gate rather than a nice-to-have on top of it.
+Plus a repository ruleset, **Automatic Copilot code review**, which requests a
+Copilot review on every pull request targeting the default branch and re-reviews
+on push.
+
+### Why approvals are set to zero
+
+This repository is personally owned with a single collaborator, and the team
+named in `CODEOWNERS` (`@RoyalAholdDelhaize/technl-ctp-team-devices-apps`) is in
+a different organisation and has no access to it.
+
+Nobody can approve their own pull request. So requiring even one approval — or
+requiring code-owner review — does not gate PRs, it **deadlocks** them
+permanently, including agent PRs.
+
+That is why **pr-reviewer** and the Copilot review ruleset matter more than they
+first appear. With human approval unenforceable, automated review is the
+judgement layer in front of the CI gate rather than a nicety on top of a human
+one.
+
+### Why "include administrators" is not optional
+
+**Branch protection with administrators excluded is cosmetic here.** It was
+applied that way first and tested: the push succeeded, and GitHub reported
+`Bypassed rule violations for refs/heads/main`. Two empty commits reached `main`
+before the setting was corrected.
+
+The reason is structural rather than accidental. The only account on this
+repository is an admin, and agents act with that account's credentials — so
+every actor the gate is meant to constrain is an actor it exempts. With
+administrators included, the same push is rejected outright:
+
+```text
+remote: error: GH006: Protected branch update failed for refs/heads/main.
+remote: - Changes must be made through a pull request.
+remote: - Required status check "CI" is expected.
+```
+
+The escape hatch is to disable protection deliberately and visibly, not to leave
+a permanent silent bypass in place.
 
 If this repository later moves under the `RoyalAholdDelhaize` organisation, the
 `CODEOWNERS` team becomes real, and required code-owner review should be turned
