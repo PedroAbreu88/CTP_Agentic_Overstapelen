@@ -12,6 +12,7 @@ expensive to acquire and is not recoverable from the code alone.
 | [`docs/product-context.md`](docs/product-context.md) | **Always, first.** What the Stack App is, the Dutch domain glossary, the two phases, and what is still undecided. Without it the repository does not explain its own purpose. |
 | [`docs/ci-cd.md`](docs/ci-cd.md) | Touching delivery, environments, or anything deployed. Also documents constraints that shape application design. |
 | [`docs/confluence-access.md`](docs/confluence-access.md) | Before any Confluence call. Documents non-obvious failure modes that otherwise cost a long debugging cycle. |
+| [`docs/figma-access.md`](docs/figma-access.md) | Before reading the UI designs. Covers the file key, why we use the REST API rather than the MCP server, and the traps in the components/styles endpoints. |
 | [`docs/decisions/`](docs/decisions/) | Before revisiting a settled architectural choice, and when making one worth recording. |
 | [`docs/agent-operating-model.md`](docs/agent-operating-model.md) | Before starting component work, or when deciding which agent should do something. Defines the `web` / `services` / `platform` split, the shared API seam, and how review works. |
 
@@ -47,6 +48,32 @@ Two specific traps, both seen in practice:
 
 If in doubt: **ask, don't act.** An unwanted change costs more to unpick than a
 question costs to answer.
+
+## A list of options is a question, not a plan
+
+**Never choose from your own option list on the user's behalf.** Presenting
+scored options (see below) ends the turn. The user picks. This holds even when:
+
+- the user appears unavailable, or a tool reports that they are;
+- autonomous or autopilot mode is active;
+- one option scores obviously higher than the rest;
+- the action looks cheap, reversible, or "just a config file";
+- you have already presented the same list once and had no reply.
+
+Silence is not selection. An unanswered question stays unanswered — it does not
+decay into consent for the highest-scoring option. Scoring an option `Recommend
+9` is an argument for it, not permission to do it.
+
+This applies with particular force to anything that changes the user's
+environment rather than the repository: installing or configuring MCP servers,
+plugins, skills or extensions, adding credentials, altering app or editor
+settings, and any action that begins an authentication flow. Those live outside
+the repository, so they are not reviewable in a pull request and not revertable
+by `git`. Write the configuration, show it, explain what it will do — then stop
+and let the user apply it.
+
+If you genuinely cannot proceed without a decision, say what you are blocked on
+and end the turn. Ending blocked is a correct outcome.
 
 ## Presenting options and proposals
 
