@@ -95,3 +95,32 @@ When you learn something durable — a working integration, a non-obvious failur
 mode, a decision and its reasoning — write it into `docs/` and commit it. Prefer
 extending an existing document over creating a new one. Record contested
 decisions in `docs/decisions/` following the criteria in its README.
+
+## Closing off a session
+
+Run through this before a session ends. Its purpose is to leave nothing valuable
+trapped in a conversation that is about to disappear.
+
+1. **Capture durable knowledge.** Anything learned that would cost real time to
+   rediscover goes into `docs/`. If the session produced no lasting knowledge,
+   say so explicitly rather than inventing a document.
+2. **Commit and push.** Unpushed work exists on exactly one machine.
+3. **Verify the working tree is clean** and no credentials reached the working
+   tree or git history.
+4. **Clean up scratch files.** Temporary scripts and intermediate output should
+   not survive, in the repository or on disk.
+5. **Open a pull request** describing what changed and *why*, including the dead
+   ends — the reasoning is usually worth more than the diff.
+6. **Decide whether to merge, deliberately.**
+
+On that last point: merging is not automatic.
+
+- **Merge** when the change is low-risk and something else is blocked until it
+  lands. Documentation that new sessions depend on is the clearest case, because
+  sessions branch from the default branch and cannot see unmerged work.
+- **Leave open for review** when the change alters how other people work, carries
+  real risk, or touches an area with an owner in `CODEOWNERS`.
+
+The failure mode worth naming: documentation written to orient future sessions is
+useless while it sits unmerged, because those sessions branch from the default
+branch and never see it.
