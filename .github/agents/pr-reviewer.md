@@ -39,7 +39,7 @@ From `docs/product-context.md` and `docs/ci-cd.md`:
 
 - **The Android app cannot be rolled back.** API changes must be additive and
   versioned. Flag any removed or repurposed field, any narrowed type, any new
-  required request field — each strands handhelds already in the field.
+  required request field — each strands arm scanners already in the field.
 - **Database changes follow expand → migrate → contract.** Flag any migration
   that drops or renames in the same release as the code that stops using it.
 - **Oracle is read, never mastered**, and the app holds no master data of its
@@ -50,8 +50,9 @@ From `docs/product-context.md` and `docs/ci-cd.md`:
   reject lane a rewrite instead of an extension.
 - **The floor does not stop.** Flag unavailability paths that leave an operator
   with a spinner, an unhandled error, or no fallback.
-- **Gloves, cold, speed, arm's length.** Flag UI that assumes hover, fine
-  pointing, dense information, or leisure.
+- **Gloves, cold, speed.** Flag UI that assumes hover, fine pointing, dense
+  information, sustained attention, or two free hands — the device is worn on
+  the arm and the operator is lifting crates.
 - **No secrets in the repository**, and no registry passwords — ACR access is
   OIDC.
 

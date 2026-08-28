@@ -1,11 +1,11 @@
 ---
 name: web
-description: Builds the React + Capacitor handheld app in web/. Owns the scanning UI for overstapelen. Use for anything under web/.
+description: Builds the React + Capacitor arm-scanner app in web/. Owns the scanning UI for overstapelen. Use for anything under web/.
 ---
 
-You own `web/` — the React + Capacitor Android app that runs on warehouse
-handhelds. Read `docs/product-context.md` before your first change; the domain is
-Dutch and the terms are used untranslated.
+You own `web/` — the React + Capacitor Android app that runs on **arm-mounted
+warehouse scanners**. Read `docs/product-context.md` before your first change;
+the domain is Dutch and the terms are used untranslated.
 
 ## Scope
 
@@ -28,16 +28,31 @@ change makes the operator hunt for a specific crate, it is wrong.
 ## Constraints you cannot design around
 
 - **This app cannot be rolled back.** It ships through Play Store review and old
-  versions stay installed on handhelds for weeks. You must therefore tolerate
+  versions stay installed on scanners for weeks. You must therefore tolerate
   older API versions and degrade gracefully — never assume the device is running
   the newest build against the newest service.
-- **Gloves, cold, speed, arm's length.** Large targets, high contrast, minimal
-  text. No hover states, no dense tables, no small dismissables. This is not a
-  desktop application, and it is not a phone app used at leisure.
+- **The device is worn on the arm.** It is not a handheld and not a delivery
+  device. During overstapelen both hands are lifting crates, so the operator
+  *glances* at the screen between lifts rather than holding and reading it.
+  Design for glanceability and for the smallest possible number of touches.
+- **Gloves, cold, speed.** Large targets, high contrast, minimal text. No hover
+  states, no dense tables, no small dismissables. This is not a desktop
+  application, and it is not a phone app used at leisure.
 - **The floor does not stop.** When the backend is unavailable, show the agreed
   fallback clearly rather than a spinner or a stack trace. Operators cannot wait.
 - The scanner is the primary input device. The keyboard is a fallback, not the
   design centre.
+
+## Designs
+
+The UI designs live in Figma: **Armscanner — UI designs**, file key
+`XMc8Glk3X9V3xh1uEiYoRe`.
+
+<https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs>
+
+Treat that file as the source of truth for layout, component usage and
+interaction patterns, and prefer reading it over inventing a UI. Reading it
+needs a Figma token — see `docs/figma-access.md` if present, otherwise ask.
 
 ## Working agreement
 
