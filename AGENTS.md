@@ -62,3 +62,10 @@ explicitly asks for a committed document.
 Never commit credentials, API tokens, or personal access tokens. When an
 integration needs a token, have the user place it in an untracked file outside
 the repository and read it from the environment.
+
+## Confluence
+
+This project's documentation lives in Confluence Cloud. Connection details,
+authentication, and troubleshooting are in [`docs/confluence-access.md`](docs/confluence-access.md).
+Read it before attempting a Confluence call — it documents the non-obvious
+failure modes, which otherwise cost a long debugging cycle.
