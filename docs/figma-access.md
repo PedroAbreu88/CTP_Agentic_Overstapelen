@@ -3,6 +3,22 @@
 How to read the UI designs from a local shell or an AI coding agent session.
 Contains **no credentials** — every developer supplies their own token.
 
+## Quickstart
+
+`tools/figma-read.sh` does the reading. It never takes the token as an argument
+and never prints it.
+
+```bash
+# Validate the token only — the cheapest check that access works
+./tools/figma-read.sh
+
+# Read a file: pages, published components, published styles
+./tools/figma-read.sh XMc8Glk3X9V3xh1uEiYoRe
+```
+
+Exit codes: `2` when no token is found, `3` when `curl` or `node` is missing,
+`1` on an API or transport failure.
+
 ## The file
 
 | Property | Value |

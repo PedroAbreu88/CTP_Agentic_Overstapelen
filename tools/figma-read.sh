@@ -22,7 +22,25 @@
 
 set -uo pipefail
 
-api() { curl -s -w '\n%{http_code}' -H "X-Figma-Token: $TOKEN" "https://api.figma.com/v1/$1"; }
+# Fail loudly on a missing dependency rather than part-way through with
+# confusing output.
+for dep in curl node; do
+  command -v "$dep" >/dev/null 2>&1 || { echo "Required command not found: $dep" >&2; exit 3; }
+done
+
+# -sS keeps curl quiet on success but still reports transport failures. Without
+# -S a DNS or TLS problem produces an empty body and an empty status code, which
+# is very hard to tell apart from a valid-but-empty response.
+api() {
+  local body status
+  body=$(curl -sS -w '\n%{http_code}' -H "X-Figma-Token: $TOKEN" "https://api.figma.com/v1/$1")
+  status=$?
+  if [ "$status" -ne 0 ]; then
+    echo "curl failed (exit $status) — network, DNS or TLS problem, not an API error" >&2
+    return 1
+  fi
+  printf '%s' "$body"
+}
 
 resolve_token() {
   if [ -n "${FIGMA_TOKEN:-}" ]; then TOKEN="$FIGMA_TOKEN"; SRC="\$FIGMA_TOKEN"; return 0; fi
@@ -53,7 +71,7 @@ echo "Token source: $SRC"
 echo
 
 echo "== GET /v1/me =="
-body=$(api me); code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
+body=$(api me) || exit 1; code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
 echo "HTTP $code"
 case "$code" in
   200) printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const u=JSON.parse(s);console.log("  authenticated as:",u.email||u.handle||u.id);console.log("  handle:",u.handle);})' ;;
@@ -66,7 +84,7 @@ esac
 
 echo
 echo "== GET /v1/files/$1?depth=1 =="
-body=$(api "files/$1?depth=1"); code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
+body=$(api "files/$1?depth=1") || exit 1; code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
 echo "HTTP $code"
 if [ "$code" = "200" ]; then
   printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const f=JSON.parse(s);
@@ -79,7 +97,12 @@ if [ "$code" = "200" ]; then
   })'
 else
   printf '  %s\n' "$(printf '%s' "$body" | head -c 400)"
-  echo "  404 usually means the key is wrong; 403 means the token cannot see this file."
+  case "$code" in
+    429) echo "  Rate limited. Figma's limit is cost-based and recovery takes"
+         echo "  minutes, not seconds — see docs/figma-access.md." ;;
+    404) echo "  Wrong file key — check for a copied URL fragment or a branch key." ;;
+    403) echo "  Token is valid but cannot see this file." ;;
+  esac
   exit 1
 fi
 
@@ -87,7 +110,7 @@ fi
 # worth turning into a committed inventory, rather than re-read every session.
 echo
 echo "== GET /v1/files/$1/components =="
-body=$(api "files/$1/components"); code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
+body=$(api "files/$1/components") || exit 1; code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
 echo "HTTP $code"
 if [ "$code" = "200" ]; then
   printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s);
@@ -106,7 +129,7 @@ fi
 
 echo
 echo "== GET /v1/files/$1/styles =="
-body=$(api "files/$1/styles"); code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
+body=$(api "files/$1/styles") || exit 1; code=$(printf '%s' "$body" | tail -n1); body=$(printf '%s' "$body" | sed '$d')
 echo "HTTP $code"
 if [ "$code" = "200" ]; then
   printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s);
