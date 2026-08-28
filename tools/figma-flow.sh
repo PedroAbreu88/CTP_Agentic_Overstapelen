@@ -49,7 +49,7 @@ const j = require(process.argv[1]);
 if (j.status && j.status !== 200) { console.error("  API " + j.status + ": " + (j.err || "")); process.exit(1); }
 ' "$TMP/doc.json" || {
   echo "Could not list pages. If this was a 429, Figma's limit is cost-based —" >&2
-  echo "expect to wait several minutes, not seconds." >&2
+  echo "and can take hours to clear once exhausted." >&2
   exit 1
 }
 
