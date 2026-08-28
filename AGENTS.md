@@ -2,6 +2,22 @@
 
 Conventions for AI coding agents working in this repository.
 
+## Start here
+
+Read these before doing substantive work. They exist because the knowledge was
+expensive to acquire and is not recoverable from the code alone.
+
+| Document | Read it when |
+| --- | --- |
+| [`docs/product-context.md`](docs/product-context.md) | **Always, first.** What the Stack App is, the Dutch domain glossary, the two phases, and what is still undecided. Without it the repository does not explain its own purpose. |
+| [`docs/ci-cd.md`](docs/ci-cd.md) | Touching delivery, environments, or anything deployed. Also documents constraints that shape application design. |
+| [`docs/confluence-access.md`](docs/confluence-access.md) | Before any Confluence call. Documents non-obvious failure modes that otherwise cost a long debugging cycle. |
+| [`docs/decisions/`](docs/decisions/) | Before revisiting a settled architectural choice, and when making one worth recording. |
+
+A previous session's chat history is **not** a substitute for these documents. It
+is machine-local, unreadable by teammates, and full of superseded reasoning. If
+something is worth carrying forward, write it into `docs/` instead.
+
 ## Presenting options and proposals
 
 Whenever you present options, proposals, approaches, or trade-offs, score **every**
@@ -69,3 +85,13 @@ This project's documentation lives in Confluence Cloud. Connection details,
 authentication, and troubleshooting are in [`docs/confluence-access.md`](docs/confluence-access.md).
 Read it before attempting a Confluence call — it documents the non-obvious
 failure modes, which otherwise cost a long debugging cycle.
+
+## Keeping context alive
+
+Session history does not transfer between sessions, machines, or people. Written
+documents are the only mechanism that does.
+
+When you learn something durable — a working integration, a non-obvious failure
+mode, a decision and its reasoning — write it into `docs/` and commit it. Prefer
+extending an existing document over creating a new one. Record contested
+decisions in `docs/decisions/` following the criteria in its README.
