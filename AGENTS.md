@@ -62,8 +62,11 @@ Rules:
 
 - Never use a table for the scores.
 - Always indent the variable lines under the option heading.
+- **Order options by `Recommend`, highest first.** The reader should meet the
+  strongest option before the weaker ones.
 - Keep each justification to one short clause or sentence.
-- Label options `A`, `B`, `C`, ... in the order presented.
+- Label options `A`, `B`, `C`, ... in the order presented, so `A` is always the
+  best-scoring option.
 - Include the do-nothing / status-quo option when it is genuinely on the table.
 - Close the set of options with a single-line **Play:** recommending what to do.
 

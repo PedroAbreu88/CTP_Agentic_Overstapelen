@@ -52,7 +52,13 @@ What this makes easy, what it makes hard, and what we accept as a cost.
 ## Expected first entry
 
 The Stack App interaction design — **scan every crate, or read a position map
-from a single scan** — is the first decision that meets all three criteria. It
-drives throughput, error rate, and hardware needs, and it is listed as open
-question 1 in `docs/product-context.md`. Record it here once floor observation
-settles it.
+from a single scan** — is expected to be recorded here once floor observation
+settles it. It drives throughput, error rate, and hardware needs, and is listed
+as open question 1 in `docs/product-context.md`.
+
+## Index
+
+| ADR | Status | Summary |
+| --- | --- | --- |
+| [0001](0001-trunk-based-development.md) | Accepted | Keep trunk-based development on `main`; reject a long-lived `develop` branch. |
+| [0002](0002-pin-images-by-digest.md) | Proposed | Pin production images by digest rather than mutable tag. Confirm when the first component lands. |
