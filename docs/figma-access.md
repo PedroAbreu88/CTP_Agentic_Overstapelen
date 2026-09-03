@@ -126,7 +126,7 @@ reasons.
 | `/v1/files/:key/components` | **Published** components only. |
 | `/v1/files/:key/styles` | **Published** styles — colours, type, effects. |
 | `/v1/files/:key/nodes?ids=:id` | Specific nodes. `node-id=17-3` in a URL is `17:3` here. |
-| `/v1/files/:key/variables/local` | Design variables. **Enterprise plan only.** |
+| `/v1/files/:key/variables/local` | Design variables. **Enterprise plan and a Dev or Full seat.** |
 
 Two traps in that table:
 
@@ -206,7 +206,7 @@ That is the only reliable route, and at 13 KB it is cheap.
 | `403` on `/v1/me` | Token is expired, revoked, or lacks the scope. Not a file permission problem. |
 | `403` on a file | The token is valid but that account cannot see the file. |
 | `404` on a file | Wrong file key — check for a copied URL fragment or a `branch` key. |
-| `403` on `/variables/local` | Not Enterprise. Derive tokens from published styles instead. |
+| `403` on `/variables/local` | Needs an Enterprise plan **and** a Dev or Full seat. Derive tokens from published styles instead. |
 | Empty `components` list | Wrong file — you queried the designs file, not the library. |
 | `429 Rate limit exceeded` | Read the `retry-after` header — it is authoritative and has been as long as **3.4 days**. See [Rate limits](#rate-limits). |
 

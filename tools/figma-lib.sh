@@ -43,7 +43,8 @@ figma_explain_429() {
       const h = s / 3600;
       const pretty = h >= 48 ? (s / 86400).toFixed(1) + " days"
                    : h >= 1  ? h.toFixed(1) + " hours"
-                             : Math.round(s / 60) + " minutes";
+                   : s >= 60 ? Math.round(s / 60) + " minutes"
+                             : s + " seconds";
       console.error("  retry-after: " + s + "s (" + pretty + ") — clears about " + until.toISOString());
     '
   else
