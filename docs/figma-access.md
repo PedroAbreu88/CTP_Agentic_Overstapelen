@@ -150,8 +150,12 @@ hours**, blocking even cheap follow-up calls.
 Practical consequences:
 
 - Always pass `?depth=1`, or use `/nodes?ids=`, unless you genuinely need the
-  entire tree. You almost never do.
+  entire tree. You almost never do. **`?depth=1` on the designs file is 13 KB;
+  the same call without `depth` is 33 MB.**
 - Fetch each endpoint once and reuse the response from disk.
+- **The budget is small and refills slowly.** Two calls in quick succession were
+  enough to trigger a `429` even after six days of no activity. Treat every call
+  as expensive, and cache aggressively.
 - **Recovery is much slower than the wording suggests.** One undepthed `GET
   /v1/files/:key` on the 33 MB designs file left that endpoint returning `429`
   for **over two hours**, and repeated retries appeared to extend it rather
@@ -161,6 +165,16 @@ Practical consequences:
   calls to `/nodes` exhausted that bucket too. Budget the whole session, not
   each endpoint.
 - Prefer reading `docs/design-system.md`, which needs no API call at all.
+
+## Node IDs — `0:1` is not the document
+
+There is no node id for the document root that `/nodes` will return. **`0:1` is
+the first page**, which in the designs file is `↳ Login`. Asking for it and
+treating the result as the document yields one page's frames, silently, with no
+error.
+
+To list pages, use `GET /v1/files/:key?depth=1` and read `document.children`.
+That is the only reliable route, and at 13 KB it is cheap.
 
 ## Failure modes
 
