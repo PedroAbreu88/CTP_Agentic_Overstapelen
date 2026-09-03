@@ -31,6 +31,10 @@ neither prints it.
 Exit codes: `2` when no token is found, `3` when `curl` or `node` is missing,
 `1` on an API or transport failure.
 
+All three share `tools/figma-lib.sh`, which reports the `retry-after` header on
+a `429` — so a rate limit tells you when it clears instead of leaving you to
+guess.
+
 For the component vocabulary, prefer `docs/design-system.md` over either
 script: it is committed, needs no token, and costs no API call.
 
@@ -122,7 +126,7 @@ reasons.
 | `/v1/files/:key/components` | **Published** components only. |
 | `/v1/files/:key/styles` | **Published** styles — colours, type, effects. |
 | `/v1/files/:key/nodes?ids=:id` | Specific nodes. `node-id=17-3` in a URL is `17:3` here. |
-| `/v1/files/:key/variables/local` | Design variables. **Enterprise plan only.** |
+| `/v1/files/:key/variables/local` | Design variables. **Enterprise plan and a Dev or Full seat.** |
 
 Two traps in that table:
 
@@ -139,32 +143,51 @@ A third, learned the expensive way: **the full designs file is 33 MB.** Never
 
 ## Rate limits
 
-Figma rate-limits aggressively and returns `{"status":429,"err":"Rate limit
-exceeded"}`.
+Figma returns `{"status":429,"err":"Rate limit exceeded"}` — and, crucially,
+**tells you exactly how long you are blocked for in the response headers.**
+Nothing in the body says so. Always look at the headers:
 
-The limit is **cost-based, not a simple request count**, and `GET /v1/files/:key`
-without a `depth` parameter is by far the most expensive call available. One
-full read of the designs file — 33 MB — exhausted the budget for **over two
-hours**, blocking even cheap follow-up calls.
+```
+retry-after: 291693
+x-figma-plan-tier: enterprise
+x-figma-rate-limit-type: low
+x-figma-upgrade-link: https://www.figma.com/files?api_paywall=true
+```
+
+`retry-after` is in **seconds**. The value above is **3.4 days**. Earlier
+sessions guessed "minutes", then "hours", and repeatedly retried into a block
+that had days left to run — because nobody read the headers. The tools now
+report this automatically; `tools/figma-lib.sh` does the work.
+
+### The limit is a seat restriction, not the org plan
+
+Note the two tier headers disagree: the plan is **enterprise**, but the rate
+limit type applied is **low**. That combination, plus the `upgrade-link`, means
+the restriction comes from the **seat**, not the organisation's plan.
+
+Figma's own guidance is that Starter plans and **View or Collab seats** get
+severely reduced API access, while **Dev or Full seats** on a paid plan get
+normal per-minute limits. The observed behaviour matches: a single expensive
+call bought a multi-day block, and even two small calls after six days of
+inactivity triggered another.
+
+**This is the single most important constraint on working with Figma here.**
+Until the seat changes, treat the API as something you may touch a handful of
+times per week, not per session.
 
 Practical consequences:
 
+- **Read `docs/design-system.md` instead.** It is committed, needs no token,
+  and costs nothing. This is why it exists.
 - Always pass `?depth=1`, or use `/nodes?ids=`, unless you genuinely need the
-  entire tree. You almost never do. **`?depth=1` on the designs file is 13 KB;
-  the same call without `depth` is 33 MB.**
+  entire tree. **`?depth=1` on the designs file is 13 KB; the same call without
+  `depth` is 33 MB** — and that one call caused the multi-day block.
 - Fetch each endpoint once and reuse the response from disk.
-- **The budget is small and refills slowly.** Two calls in quick succession were
-  enough to trigger a `429` even after six days of no activity. Treat every call
-  as expensive, and cache aggressively.
-- **Recovery is much slower than the wording suggests.** One undepthed `GET
-  /v1/files/:key` on the 33 MB designs file left that endpoint returning `429`
-  for **over two hours**, and repeated retries appeared to extend it rather
-  than shorten it. Treat a 429 as "come back later", not "wait and retry".
-- **The buckets are per-endpoint, but they are not independent.** `/components`
-  and `/styles` kept working while `/v1/files/:key` was blocked — but enough
-  calls to `/nodes` exhausted that bucket too. Budget the whole session, not
-  each endpoint.
-- Prefer reading `docs/design-system.md`, which needs no API call at all.
+- **Never retry on a hunch.** Read `retry-after` and believe it.
+- The buckets are roughly per-endpoint but not independent: `/components` and
+  `/styles` kept working while `/v1/files/:key` was blocked, yet enough
+  `/nodes` calls exhausted that bucket too. Budget the session, not the
+  endpoint.
 
 ## Node IDs — `0:1` is not the document
 
@@ -183,9 +206,9 @@ That is the only reliable route, and at 13 KB it is cheap.
 | `403` on `/v1/me` | Token is expired, revoked, or lacks the scope. Not a file permission problem. |
 | `403` on a file | The token is valid but that account cannot see the file. |
 | `404` on a file | Wrong file key — check for a copied URL fragment or a `branch` key. |
-| `403` on `/variables/local` | Not Enterprise. Derive tokens from published styles instead. |
+| `403` on `/variables/local` | Needs an Enterprise plan **and** a Dev or Full seat. Derive tokens from published styles instead. |
 | Empty `components` list | Wrong file — you queried the designs file, not the library. |
-| `429 Rate limit exceeded` | Cost-based limit exhausted. Can take hours to clear, and retries appear to extend it. See [Rate limits](#rate-limits). |
+| `429 Rate limit exceeded` | Read the `retry-after` header — it is authoritative and has been as long as **3.4 days**. See [Rate limits](#rate-limits). |
 
 ## What the designs are for
 

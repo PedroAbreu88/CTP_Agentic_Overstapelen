@@ -13,56 +13,22 @@
 
 set -uo pipefail
 
-# Fail loudly on a missing dependency rather than part-way through with a
-# generic shell error. Matches tools/figma-read.sh and the documented exit
-# codes in docs/figma-access.md.
-for dep in curl node; do
-  command -v "$dep" >/dev/null 2>&1 || { echo "Required command not found: $dep" >&2; exit 3; }
-done
+. "$(cd "$(dirname "$0")" && pwd)/figma-lib.sh"
+
+figma_require_deps
+figma_resolve_token || { echo "No Figma token. See docs/figma-access.md." >&2; exit 2; }
 
 LIBRARY_KEY="nsgOZTtYiHjPOxrt1ImVHv"
 DESIGNS_KEY="XMc8Glk3X9V3xh1uEiYoRe"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/docs/design-system.md"
 
-resolve_token() {
-  if [ -n "${FIGMA_TOKEN:-}" ]; then TOKEN="$FIGMA_TOKEN"; return 0; fi
-  if TOKEN=$(security find-generic-password -s figma -w 2>/dev/null) && [ -n "$TOKEN" ]; then return 0; fi
-  if [ -s "$HOME/.figma-token" ]; then TOKEN=$(tr -d '[:space:]' < "$HOME/.figma-token"); return 0; fi
-  return 1
-}
-
-resolve_token || { echo "No Figma token. See docs/figma-access.md." >&2; exit 2; }
-
-# -sS keeps curl quiet on success but still reports transport failures. Without
-# -S a DNS or TLS problem yields an empty body, which then surfaces as a Node
-# stack trace rather than a usable message.
-api() {
-  local out status
-  out=$(curl -sS -H "X-Figma-Token: $TOKEN" "https://api.figma.com/v1/$1")
-  status=$?
-  if [ "$status" -ne 0 ]; then
-    echo "curl failed (exit $status) — network, DNS or TLS problem, not an API error" >&2
-    return 1
-  fi
-  printf '%s' "$out"
-}
-
 # Figma rate-limits aggressively. Fetch each endpoint once, reuse from disk.
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 
-fetch() { # fetch <path> <outfile>
-  api "$1" > "$2" || return 1
-  if node -e 'const j=require(process.argv[1]); if(j.status&&j.status!==200){console.error("  API "+j.status+": "+(j.err||""));process.exit(1)}' "$2" 2>&1; then
-    return 0
-  fi
-  return 1
-}
-
 echo "Fetching library metadata..."
-fetch "files/$LIBRARY_KEY?depth=1" "$TMP/meta.json" || {
-  echo "Could not read the library. If this was a 429, Figma's limit is" >&2
-  echo "cost-based and can take hours to clear once exhausted." >&2
+figma_api "files/$LIBRARY_KEY?depth=1" "$TMP/meta.json" || {
+  echo "Could not read the library." >&2
   exit 1
 }
 
@@ -77,9 +43,9 @@ if [ "${1:-}" = "--check" ]; then
 fi
 
 echo "Fetching components..."
-fetch "files/$LIBRARY_KEY/components" "$TMP/components.json" || exit 1
+figma_api "files/$LIBRARY_KEY/components" "$TMP/components.json" || exit 1
 echo "Fetching styles..."
-fetch "files/$LIBRARY_KEY/styles" "$TMP/styles.json" || exit 1
+figma_api "files/$LIBRARY_KEY/styles" "$TMP/styles.json" || exit 1
 
 echo "Writing $OUT"
 LAST_MODIFIED="$LAST_MODIFIED" LIBRARY_KEY="$LIBRARY_KEY" DESIGNS_KEY="$DESIGNS_KEY" \

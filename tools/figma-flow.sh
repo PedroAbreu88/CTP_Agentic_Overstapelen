@@ -2,8 +2,8 @@
 # Read UI flows from the Armscanner designs file and summarise their layout.
 #
 # Deliberately frugal with API calls: Figma's rate limit is cost-based and can
-# take hours to clear once exhausted, so this makes exactly two requests — one
-# for the page list, one for the selected pages' frames.
+# take *days* to clear on a low-tier seat, so this makes exactly two requests —
+# one for the page list, one for the selected pages' frames.
 #
 #   ./tools/figma-flow.sh                 # list pages, so you can pick
 #   ./tools/figma-flow.sh Picking         # summarise pages matching a pattern
@@ -14,30 +14,12 @@
 
 set -uo pipefail
 
-for dep in curl node; do
-  command -v "$dep" >/dev/null 2>&1 || { echo "Required command not found: $dep" >&2; exit 3; }
-done
+. "$(cd "$(dirname "$0")" && pwd)/figma-lib.sh"
+
+figma_require_deps
+figma_resolve_token || { echo "No Figma token. See docs/figma-access.md." >&2; exit 2; }
 
 DESIGNS_KEY="${FIGMA_DESIGNS_KEY:-XMc8Glk3X9V3xh1uEiYoRe}"
-
-resolve_token() {
-  if [ -n "${FIGMA_TOKEN:-}" ]; then TOKEN="$FIGMA_TOKEN"; return 0; fi
-  if TOKEN=$(security find-generic-password -s figma -w 2>/dev/null) && [ -n "$TOKEN" ]; then return 0; fi
-  if [ -s "$HOME/.figma-token" ]; then TOKEN=$(tr -d '[:space:]' < "$HOME/.figma-token"); return 0; fi
-  return 1
-}
-resolve_token || { echo "No Figma token. See docs/figma-access.md." >&2; exit 2; }
-
-api() {
-  local out status
-  out=$(curl -sS -H "X-Figma-Token: $TOKEN" "https://api.figma.com/v1/$1")
-  status=$?
-  if [ "$status" -ne 0 ]; then
-    echo "curl failed (exit $status) — network, DNS or TLS problem, not an API error" >&2
-    return 1
-  fi
-  printf '%s' "$out"
-}
 
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 
@@ -46,16 +28,11 @@ TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 # node 0:1 is the *first page*, not the document root, so /nodes cannot be used
 # for this. Without a depth parameter the same endpoint returns 33 MB and
 # exhausts the rate limit for hours.
-api "files/$DESIGNS_KEY?depth=1" > "$TMP/doc.json" || exit 1
+figma_api "files/$DESIGNS_KEY?depth=1" "$TMP/doc.json" || { echo "Could not list pages." >&2; exit 1; }
 node -e '
 const j = require(process.argv[1]);
-if (j.status && j.status !== 200) { console.error("  API " + j.status + ": " + (j.err || "")); process.exit(1); }
 if (!j.document || !j.document.children) { console.error("  Unexpected payload: no document.children"); process.exit(1); }
-' "$TMP/doc.json" || {
-  echo "Could not list pages. If this was a 429, Figma's limit is cost-based —" >&2
-  echo "and can take hours to clear once exhausted." >&2
-  exit 1
-}
+' "$TMP/doc.json" || exit 1
 
 PATTERN="${1:-}"
 
@@ -77,13 +54,8 @@ console.log(hits.map(p => p.id).join(","));
 ' "$TMP/doc.json") || exit 1
 
 echo "Reading pages: $IDS" >&2
-api "files/$DESIGNS_KEY/nodes?ids=$IDS&depth=8" > "$TMP/pages.json" || exit 1
-node -e '
-const j = require(process.argv[1]);
-if (j.status && j.status !== 200) { console.error("  API " + j.status + ": " + (j.err || "")); process.exit(1); }
-' "$TMP/pages.json" || {
-  echo "Could not read those pages. A 429 here means the budget ran out between" >&2
-  echo "the two calls — Figma's limit is cost-based and can take hours to clear." >&2
+figma_api "files/$DESIGNS_KEY/nodes?ids=$IDS&depth=8" "$TMP/pages.json" || {
+  echo "Could not read those pages — the budget ran out between the two calls." >&2
   exit 1
 }
 
