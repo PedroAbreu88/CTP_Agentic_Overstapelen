@@ -41,12 +41,16 @@ api() {
 
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 
-# The document node yields every page id in one request. /v1/files/:key without
-# depth would also work but is enormously more expensive — 33 MB for this file.
-api "files/$DESIGNS_KEY/nodes?ids=0:1&depth=1" > "$TMP/doc.json" || exit 1
+# The file endpoint with depth=1 returns the document and its page names only —
+# about 13 KB for this file. It is the correct way to list pages. Note that
+# node 0:1 is the *first page*, not the document root, so /nodes cannot be used
+# for this. Without a depth parameter the same endpoint returns 33 MB and
+# exhausts the rate limit for hours.
+api "files/$DESIGNS_KEY?depth=1" > "$TMP/doc.json" || exit 1
 node -e '
 const j = require(process.argv[1]);
 if (j.status && j.status !== 200) { console.error("  API " + j.status + ": " + (j.err || "")); process.exit(1); }
+if (!j.document || !j.document.children) { console.error("  Unexpected payload: no document.children"); process.exit(1); }
 ' "$TMP/doc.json" || {
   echo "Could not list pages. If this was a 429, Figma's limit is cost-based —" >&2
   echo "and can take hours to clear once exhausted." >&2
@@ -58,18 +62,16 @@ PATTERN="${1:-}"
 if [ -z "$PATTERN" ]; then
   node -e '
   const j = require(process.argv[1]);
-  const d = j.nodes[Object.keys(j.nodes)[0]].document;
-  console.log("Pages in " + (d.name || "document") + ":");
-  for (const p of d.children || []) console.log("  " + p.id + "  " + p.name);
+  console.log(j.name + "  (lastModified " + j.lastModified + ")");
+  for (const p of j.document.children || []) console.log("  " + p.id + "  " + p.name);
   ' "$TMP/doc.json"
   exit 0
 fi
 
 IDS=$(PATTERN="$PATTERN" node -e '
 const j = require(process.argv[1]);
-const d = j.nodes[Object.keys(j.nodes)[0]].document;
 const re = new RegExp(process.env.PATTERN, "i");
-const hits = (d.children || []).filter(p => re.test(p.name));
+const hits = (j.document.children || []).filter(p => re.test(p.name));
 if (!hits.length) { console.error("No page matches: " + process.env.PATTERN); process.exit(1); }
 console.log(hits.map(p => p.id).join(","));
 ' "$TMP/doc.json") || exit 1
