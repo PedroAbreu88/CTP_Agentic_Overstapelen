@@ -33,6 +33,7 @@ untranslated throughout the code and documentation.
 | **Picking cart** | The cart a picker fills with crates. Mapped during picking, so the system knows which crates are on it. |
 | **Reject lane** | Mechanised-HSC lane collecting crates that fell out of the automated flow. |
 | **Stickerfree** | The programme removing physical stickers from crates. Phase 2 is what creates the need for this app. |
+| **Finishing** / **Finisher** | What the operation itself calls overstapelen and the operator who performs it, in CWMS process language ("transfers totes from pick carts to delivery carts"). Search for both terms — material is filed under either. See `docs/operations-context.md`. |
 
 ## The problem
 
@@ -104,6 +105,12 @@ designs.
   same fidelity, using the informal *je* rather than *u*.
 - **Scanning happens with gloves, in the cold, at speed.** This is not a desktop
   application, and it is not a phone app used at leisure.
+- **Roughly 92% of the workforce is flex.** Manager HSC Fulfilment and Teamlead
+  Fulfilment both carry an 8:92 vast-to-flex split, with continuous onboarding of
+  agency staff. **Training cannot be a dependency**: any design whose safety
+  rests on an experienced operator is resting on a population that turns over
+  constantly. The app has to be self-evident on first use, error recovery
+  included. Source and detail in `docs/operations-context.md`.
 
 ## Platform
 
@@ -115,6 +122,10 @@ mastered here, Argo CD GitOps onto KaaS, images in ACR. Full detail in
 ## Open questions
 
 These block a meaningful estimate. None should be answered from a desk.
+
+`docs/operations-context.md` narrows #1, #2 and #5 using the operation's own
+process documentation, and identifies who owns the answer to #4. It closes none
+of them.
 
 1. **Scan every crate, or read a position map from one scan?** The biggest single
    design decision. Scanning each crate is unambiguous and gives an audit trail
@@ -144,6 +155,8 @@ These block a meaningful estimate. None should be answered from a desk.
 | Delivery and environments | `docs/ci-cd.md` |
 | Agent working conventions | `AGENTS.md` |
 | Agent split and review gate | `docs/agent-operating-model.md` |
+| Operations, roles and process chain | `docs/operations-context.md` |
+| Upstream operations context (read-only) | [`RoyalAholdDelhaize/ah-product-toolkit`](https://github.com/RoyalAholdDelhaize/ah-product-toolkit) — `context/` |
 
 Confluence is the system of record for the proposal itself. This file exists so
 the repository can explain its own purpose without a network call.
