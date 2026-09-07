@@ -98,6 +98,69 @@ curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
   "$BASE/rest/api/search"
 ```
 
+## Publishing from this repository
+
+`docs/proposal.md` is **the source of truth** for the Solution proposal. The
+Confluence page (`151013721984`) is a rendering of it, and carries a banner
+saying so. Edit the Markdown, raise a pull request, then publish:
+
+```bash
+./tools/confluence-publish.sh --check    # convert and compare, change nothing
+./tools/confluence-publish.sh            # publish
+```
+
+The script resolves a token the same way the Figma tools do — `$CONFLUENCE_TOKEN`,
+then the Keychain, then `~/.confluence-token` — and takes the account email from
+`$CONFLUENCE_EMAIL` or `git config user.email`.
+
+`tools/md-to-storage.mjs` does the conversion. It handles a deliberately small
+subset of Markdown and **throws on anything else**, with a line number, rather
+than silently dropping content. A converter that quietly skips what it does not
+understand produces a page missing a paragraph nobody notices for a month.
+Adding syntax means adding a rule.
+
+Two behaviours worth knowing before you debug them:
+
+- **It refuses to overwrite a browser edit.** Every version the tool creates is
+  stamped `Published from docs/proposal.md`. If the live version's message lacks
+  that stamp, someone edited the page directly, and the script stops rather than
+  clobbering their work. Reconcile the change into the Markdown, or pass
+  `--force` if you are certain it is safe.
+- **Re-running with no changes does nothing.** This is less obvious than it
+  sounds: Confluence rewrites what you send. It injects an `ac:macro-id` into
+  every macro, reflows whitespace, and normalises character entities **in both
+  directions** — it decoded our literal `⚠` and encoded our literal em dash. A
+  byte comparison therefore never matches, so the tool would bump the version on
+  every run and fill the page history with no-op edits. The comparison decodes
+  entities on both sides before comparing.
+
+Comments on the Confluence page are safe — they are not touched by publishing,
+and are the right way for reviewers to give feedback.
+
+### The publish is triggered by a human, on purpose
+
+There is no CI job that publishes, and that is a decision rather than a gap. The
+page is read by people outside this repository, and someone should be
+accountable for the moment its contents change: a pull request is reviewable and
+revertable, a Confluence write is neither.
+
+Agents should run `--check` and report, not publish. `AGENTS.md` § *Publishing to
+Confluence is the user's call, not yours* has the working rule.
+
+The cost is that `docs/proposal.md` can merge while the page still shows the old
+version — with a banner claiming it is generated from the repository. **A stale
+page that asserts it is current is worse than one that is obviously old**,
+because readers stop questioning it. Nothing enforces the sync today; it relies
+on the closing checklist.
+
+That trade is fine while the audience is small and the proposal changes rarely.
+Revisit it if the page starts changing often or a second person begins editing
+it. The cheap next step would be a CI check that fails when `docs/proposal.md`
+changes without its conversion being regenerated — which still would not write to
+Confluence. Publishing from CI outright needs a **service account**: API tokens
+here are personal and per-machine, so there is no correct way to put one in
+GitHub Actions. Nobody has requested one.
+
 ## Troubleshooting
 
 | Symptom | Cause |

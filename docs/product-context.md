@@ -54,11 +54,18 @@ moment and place the operator needs it.
 
 1. The operator scans **any** crate on the cart.
 2. The app resolves the pick cart and batch from that single scan.
-3. The app shows which strek the crates belong to.
-4. The cart is emptied onto the strekkarren.
+3. The app draws the cart as a **position map** — one cell per crate position,
+   each showing the strek that position's crate belongs to.
+4. The cart is emptied onto the strekkarren, and the operator confirms.
 
 Scanning *any* crate rather than a designated one is the point: no hunting for a
 particular crate, and one scan per cart rather than one per crate.
+
+Step 3 is a decision, not an obvious consequence — see
+[ADR 0004](decisions/0004-position-map-over-per-crate-scan.md). It is
+**Proposed**, pending floor observation. The trade it accepts: speed and
+glanceability, at the cost of no per-crate audit trail and a dependency on
+crates staying in their picked positions.
 
 Applies to manual and mechanised HSCs. Most valuable in mechanised sites, and
 anywhere stickers are absent.
@@ -125,13 +132,15 @@ These block a meaningful estimate. None should be answered from a desk.
 
 `docs/operations-context.md` narrows #1, #2 and #5 using the operation's own
 process documentation, and identifies who owns the answer to #4. It closes none
-of them.
+of them. #1 now has a *proposed* answer in `docs/decisions/`, which is a
+direction to test on the floor, not a closure.
 
-1. **Scan every crate, or read a position map from one scan?** The biggest single
-   design decision. Scanning each crate is unambiguous and gives an audit trail
-   but costs a scan per crate. A position map is far faster but depends on crates
-   staying in their picked positions. This drives throughput, error rate, and
-   hardware needs, and should be settled by observing the floor.
+1. ~~**Scan every crate, or read a position map from one scan?**~~ **Direction
+   proposed — not yet confirmed.** [ADR 0004](decisions/0004-position-map-over-per-crate-scan.md)
+   proposes the position map. It is *Proposed* rather than *Accepted* because it
+   was settled by a draft design rather than by the floor observation this
+   question asks for. The observation that would confirm it: **do crates stay in
+   their picked positions between picking and the strekkenplein?**
 2. Which system is the authoritative source of the crate → strek assignment, and
    how is it read?
 3. Do crates carry a stable, scannable identifier once stickers are gone?
@@ -143,7 +152,8 @@ of them.
 
 | Artefact | Location |
 | --- | --- |
-| Draft solution proposal | [Confluence — Solution proposal (Agentic)](https://confluence-aholddelhaize.atlassian.net/wiki/spaces/CTPBOFAFFL/pages/151013721984/Solution+proposal+Agentic) |
+| **Solution proposal (source of truth)** | [`docs/proposal.md`](proposal.md) |
+| Solution proposal (published rendering) | [Confluence — Solution proposal (Agentic)](https://confluence-aholddelhaize.atlassian.net/wiki/spaces/CTPBOFAFFL/pages/151013721984/Solution+proposal+Agentic), published by `./tools/confluence-publish.sh` |
 | UI designs | [Figma — Armscanner UI designs](https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs) (file key `XMc8Glk3X9V3xh1uEiYoRe`) |
 | Component library | [Figma — Armscanner Library](https://www.figma.com/design/nsgOZTtYiHjPOxrt1ImVHv/) (file key `nsgOZTtYiHjPOxrt1ImVHv`) — 643 published components |
 | Design system inventory | `docs/design-system.md` |
@@ -158,5 +168,13 @@ of them.
 | Operations, roles and process chain | `docs/operations-context.md` |
 | Upstream operations context (read-only) | [`RoyalAholdDelhaize/ah-product-toolkit`](https://github.com/RoyalAholdDelhaize/ah-product-toolkit) — `context/` |
 
-Confluence is the system of record for the proposal itself. This file exists so
-the repository can explain its own purpose without a network call.
+The proposal itself now lives in this repository, at [`docs/proposal.md`](proposal.md),
+and is **published to Confluence** rather than maintained there. That inverts
+what used to be true: Confluence was the system of record, and this file existed
+so the repository could explain its own purpose without a network call. It still
+serves that purpose, but the proposal no longer needs a network call either.
+
+Edit the Markdown, review it in a pull request like any other change, then run
+`./tools/confluence-publish.sh`. The page carries a banner saying it is
+generated, and the script refuses to overwrite an edit made in the browser. See
+[`docs/confluence-access.md`](confluence-access.md).

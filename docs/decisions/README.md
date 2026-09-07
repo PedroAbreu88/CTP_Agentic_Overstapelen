@@ -49,13 +49,6 @@ What we chose.
 What this makes easy, what it makes hard, and what we accept as a cost.
 ```
 
-## Expected first entry
-
-The Stack App interaction design — **scan every crate, or read a position map
-from a single scan** — is expected to be recorded here once floor observation
-settles it. It drives throughput, error rate, and hardware needs, and is listed
-as open question 1 in `docs/product-context.md`.
-
 ## Index
 
 | ADR | Status | Summary |
@@ -63,3 +56,4 @@ as open question 1 in `docs/product-context.md`.
 | [0001](0001-trunk-based-development.md) | Accepted | Keep trunk-based development on `main`; reject a long-lived `develop` branch. |
 | [0002](0002-pin-images-by-digest.md) | Proposed | Pin production images by digest rather than mutable tag. Confirm when the first component lands. |
 | [0003](0003-pilot-cell-squad-shape.md) | Proposed | Staff a four-seat pilot cell with named floor and CWMS dependencies; scale only once open question 1 is settled *and* the `web/`, `services/` and `deploy/base` seams have content. |
+| [0004](0004-position-map-over-per-crate-scan.md) | Proposed | Read a cart position map from one scan instead of scanning every crate. Confirm by observing whether crates stay in their picked positions. |
