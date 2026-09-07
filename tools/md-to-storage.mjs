@@ -73,46 +73,61 @@ const escapeHtml = (s) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-// Link targets: anything carrying a URL scheme must use one we trust. Relative
-// paths and anchors have no scheme and are always fine. Rejecting rather than
-// escaping an odd scheme is deliberate -- there is no legitimate reason for the
-// proposal to contain javascript: or data:, and a Markdown converter should not
-// be the component deciding which exotic schemes are safe.
+// Link targets are checked against the *raw* Markdown, before any escaping, so
+// there is no decode-and-guess step to get wrong.
 const SCHEME = /^([a-z][a-z0-9+.-]*):/i;
 const ALLOWED_SCHEMES = new Set(['http', 'https', 'mailto']);
 
-const linkIsSafe = (href) => {
+function assertSafeLink(href, lineNo) {
+  // Entity escapes in a link target are refused outright rather than decoded
+  // and inspected. They are the standard way to smuggle a colon past a scheme
+  // check, and this pipeline is unusually exposed: Confluence normalises
+  // entities on save -- we have watched it decode &#9888; -- so a target like
+  // "javascript&#x3a;alert(1)" can sit inert in storage and still become a live
+  // scheme after the storage-to-HTML pass plus a browser parse. Chasing that
+  // with a decoder means matching Confluence's behaviour exactly and forever.
+  // Refusing the input is a promise we can actually keep, and no legitimate
+  // link in these documents needs an entity.
+  if (/&#|&[a-z][a-z0-9]*;/i.test(href)) {
+    fail(lineNo, `character entities are not allowed in a link target: "${href}"`);
+  }
+  // Browsers ignore control characters inside a scheme, so "java\tscript:" is
+  // a scheme. Markdown targets cannot contain whitespace, but a paste can.
+  if (/[\u0000-\u0020]/.test(href)) {
+    fail(lineNo, `whitespace or control characters in a link target: ${JSON.stringify(href)}`);
+  }
   const m = SCHEME.exec(href);
-  // A Windows-style "C:" or a stray "foo:bar" is not a relative path we want.
-  return m ? ALLOWED_SCHEMES.has(m[1].toLowerCase()) : true;
-};
+  // No scheme means a relative path or an anchor, which are always fine.
+  if (m && !ALLOWED_SCHEMES.has(m[1].toLowerCase())) {
+    fail(lineNo, `unsupported link scheme "${m[1]}"; expected http, https, mailto, or a relative path`);
+  }
+}
 
-// Inline formatting. Code spans are lifted out first so their contents are
-// never treated as markup.
+// Inline formatting. Code spans and the link tags themselves are lifted out
+// into placeholders so they are never reprocessed as markup. Link *labels* stay
+// in the stream, so bold or code inside a link label still works.
 function inline(text, lineNo) {
-  const code = [];
-  let s = text.replace(/`([^`]+)`/g, (_, c) => {
-    code.push(c);
-    return `\u0000${code.length - 1}\u0000`;
+  const held = [];
+  const hold = (html) => {
+    held.push(html);
+    return `\u0000${held.length - 1}\u0000`;
+  };
+
+  let s = text.replace(/`([^`]+)`/g, (_, c) => hold(`<code>${escapeHtml(c)}</code>`));
+
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, label, href) => {
+    assertSafeLink(href, lineNo);
+    return hold(`<a href="${escapeHtml(href)}">`) + label + hold('</a>');
   });
 
   s = escapeHtml(s);
-  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, href) => {
-    // href is already escaped by escapeHtml above; decode only what we need to
-    // test the scheme, so an encoded "javascript&#58;" cannot slip past.
-    const probe = href.replace(/&amp;/g, '&').replace(/&#(\d+);/g, (_m, n) => String.fromCodePoint(Number(n)));
-    if (!linkIsSafe(probe)) {
-      fail(lineNo, `unsupported link scheme in "${probe}"; expected http, https, mailto, or a relative path`);
-    }
-    return `<a href="${href}">${t}</a>`;
-  });
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[\s(])_([^_]+)_(?=[\s.,;:)!?]|$)/g, '$1<em>$2</em>');
   s = s.replace(/\s--\s/g, ' \u2014 ');
 
   if (/\*\*/.test(s)) fail(lineNo, 'unbalanced ** in: ' + text);
 
-  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => `<code>${escapeHtml(code[Number(i)])}</code>`);
+  return s.replace(/\u0000(\d+)\u0000/g, (_, i) => held[Number(i)]);
 }
 
 function cartGrid(rows, lineNo) {
