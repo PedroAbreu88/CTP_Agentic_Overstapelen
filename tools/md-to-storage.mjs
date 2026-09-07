@@ -97,6 +97,13 @@ function assertSafeLink(href, lineNo) {
     fail(lineNo, `whitespace or control characters in a link target: ${JSON.stringify(href)}`);
   }
   const m = SCHEME.exec(href);
+  // A scheme-relative target ("//example.com") has no scheme of its own but is
+  // not relative either -- a browser reuses the current page's scheme and goes
+  // off-site. Backslashes are covered because several browsers normalise them
+  // to forward slashes before resolving.
+  if (!m && /^[/\\]{2}/.test(href)) {
+    fail(lineNo, `scheme-relative link target "${href}"; write the full https:// URL instead`);
+  }
   // No scheme means a relative path or an anchor, which are always fine.
   if (m && !ALLOWED_SCHEMES.has(m[1].toLowerCase())) {
     fail(lineNo, `unsupported link scheme "${m[1]}"; expected http, https, mailto, or a relative path`);
@@ -171,6 +178,14 @@ function cartGrid(rows, lineNo) {
 }
 
 const src = readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+
+// inline() uses NUL as a placeholder delimiter for code spans and link tags. A
+// NUL in the source could therefore forge a placeholder and inject unescaped
+// markup. It has no legitimate place in a Markdown document, so refuse it.
+if (src.includes('\u0000')) {
+  const line = src.slice(0, src.indexOf('\u0000')).split('\n').length;
+  fail(line, 'NUL byte in source; this file is not text');
+}
 const lines = src.split('\n');
 
 let title = null;
