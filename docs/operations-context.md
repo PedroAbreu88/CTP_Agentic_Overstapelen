@@ -123,8 +123,9 @@ Manager HSC Fulfilment and Teamlead Fulfilment both carry the split **vast : fle
 = 8% : 92%**, and the source's own summary notes a flex workforce "ranging from
 40–92%".
 
-This is the most design-relevant fact in the entire source, and it is not in
-`docs/product-context.md`.
+This is the most design-relevant fact in the entire source. It was absent from
+`docs/product-context.md` until this document was written, and is now recorded
+there as a constraint.
 
 Roughly nine in ten people using this app are flexible staff, from agencies the
 Teamlead onboards continuously. It follows that:
