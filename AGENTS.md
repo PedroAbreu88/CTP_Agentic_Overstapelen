@@ -191,7 +191,9 @@ trapped in a conversation that is about to disappear.
    not survive, in the repository or on disk.
 5. **Open a pull request** describing what changed and *why*, including the dead
    ends — the reasoning is usually worth more than the diff.
-6. **Decide whether to merge, deliberately.**
+6. **If `docs/proposal.md` changed, flag that Confluence needs republishing.**
+   Do not run `./tools/confluence-publish.sh` yourself — see below.
+7. **Decide whether to merge, deliberately.**
 
 On that last point: merging is not automatic.
 
@@ -204,3 +206,35 @@ On that last point: merging is not automatic.
 The failure mode worth naming: documentation written to orient future sessions is
 useless while it sits unmerged, because those sessions branch from the default
 branch and never see it.
+
+### Publishing to Confluence is the user's call, not yours
+
+`docs/proposal.md` is the source of truth and the Confluence page is published
+from it — but **the publish is triggered by a human, deliberately.** An agent
+should convert, diff and report; it should not push to the shared space.
+
+The reasoning, so it is not mistaken for an unfinished automation: the Confluence
+page is read by people outside this repository, and someone should be
+accountable for the moment its contents change. A pull request is reviewable and
+revertable; a Confluence write is neither.
+
+So when `docs/proposal.md` changes:
+
+- **Do** run `./tools/confluence-publish.sh --check`. It converts and compares,
+  and changes nothing.
+- **Do** say in the PR description and your closing summary that the page needs
+  republishing, so it is visible rather than remembered.
+- **Do not** run the script without `--check` unless the user has asked for it in
+  that session. "The docs changed" is not an instruction to publish.
+
+This is a *current* position, not a permanent one. It is fine while the audience
+is small and the page changes rarely. Revisit it if the proposal starts changing
+often, or if a second person begins editing it — at that point the manual step
+becomes the thing most likely to be forgotten, and a CI drift check (which still
+would not write to Confluence) becomes worth the effort. Automatic publishing
+from CI needs a Confluence service account, which nobody has requested; see
+`docs/confluence-access.md`.
+
+The banner on the page asserts that it is generated from the repository. That
+claim is only true if someone publishes, so a stale page is worse than an
+obviously old one — it looks current and stops being questioned.

@@ -137,6 +137,30 @@ Two behaviours worth knowing before you debug them:
 Comments on the Confluence page are safe — they are not touched by publishing,
 and are the right way for reviewers to give feedback.
 
+### The publish is triggered by a human, on purpose
+
+There is no CI job that publishes, and that is a decision rather than a gap. The
+page is read by people outside this repository, and someone should be
+accountable for the moment its contents change: a pull request is reviewable and
+revertable, a Confluence write is neither.
+
+Agents should run `--check` and report, not publish. `AGENTS.md` § *Publishing to
+Confluence is the user's call, not yours* has the working rule.
+
+The cost is that `docs/proposal.md` can merge while the page still shows the old
+version — with a banner claiming it is generated from the repository. **A stale
+page that asserts it is current is worse than one that is obviously old**,
+because readers stop questioning it. Nothing enforces the sync today; it relies
+on the closing checklist.
+
+That trade is fine while the audience is small and the proposal changes rarely.
+Revisit it if the page starts changing often or a second person begins editing
+it. The cheap next step would be a CI check that fails when `docs/proposal.md`
+changes without its conversion being regenerated — which still would not write to
+Confluence. Publishing from CI outright needs a **service account**: API tokens
+here are personal and per-machine, so there is no correct way to put one in
+GitHub Actions. Nobody has requested one.
+
 ## Troubleshooting
 
 | Symptom | Cause |
