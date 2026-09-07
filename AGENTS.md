@@ -203,3 +203,26 @@ On that last point: merging is not automatic.
 The failure mode worth naming: documentation written to orient future sessions is
 useless while it sits unmerged, because those sessions branch from the default
 branch and never see it.
+
+### Merge only your own session's pull request
+
+**Each session owns its own PR and nobody else's.** Several sessions often run
+in parallel against this repository, each with its own worktree, branch and open
+pull request. Finding another session's PR open, green and mergeable is not an
+invitation to merge it.
+
+The reasons are practical, not territorial:
+
+- The other session may still be working on it, and may push again after review
+  feedback or a failing check.
+- Its author knows things you do not — what was verified, what is deliberately
+  incomplete, what it is waiting on.
+- Squash-merging changes the base for every other in-flight branch, so merging
+  someone else's work can hand them a conflict they did not ask for.
+
+If another session's PR looks ready, or looks wrong, **say so and leave it**.
+The user can decide, or ask that session to act. The same applies to closing,
+retargeting, force-pushing, or editing another session's branch.
+
+When a question about merging is ambiguous, assume it refers to **this
+session's** PR.
