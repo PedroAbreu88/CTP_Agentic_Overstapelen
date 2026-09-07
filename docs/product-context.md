@@ -152,7 +152,8 @@ direction to test on the floor, not a closure.
 
 | Artefact | Location |
 | --- | --- |
-| Draft solution proposal | [Confluence — Solution proposal (Agentic)](https://confluence-aholddelhaize.atlassian.net/wiki/spaces/CTPBOFAFFL/pages/151013721984/Solution+proposal+Agentic) |
+| **Solution proposal (source of truth)** | [`docs/proposal.md`](proposal.md) |
+| Solution proposal (published rendering) | [Confluence — Solution proposal (Agentic)](https://confluence-aholddelhaize.atlassian.net/wiki/spaces/CTPBOFAFFL/pages/151013721984/Solution+proposal+Agentic), published by `./tools/confluence-publish.sh` |
 | UI designs | [Figma — Armscanner UI designs](https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs) (file key `XMc8Glk3X9V3xh1uEiYoRe`) |
 | Component library | [Figma — Armscanner Library](https://www.figma.com/design/nsgOZTtYiHjPOxrt1ImVHv/) (file key `nsgOZTtYiHjPOxrt1ImVHv`) — 643 published components |
 | Design system inventory | `docs/design-system.md` |
@@ -167,5 +168,13 @@ direction to test on the floor, not a closure.
 | Operations, roles and process chain | `docs/operations-context.md` |
 | Upstream operations context (read-only) | [`RoyalAholdDelhaize/ah-product-toolkit`](https://github.com/RoyalAholdDelhaize/ah-product-toolkit) — `context/` |
 
-Confluence is the system of record for the proposal itself. This file exists so
-the repository can explain its own purpose without a network call.
+The proposal itself now lives in this repository, at [`docs/proposal.md`](proposal.md),
+and is **published to Confluence** rather than maintained there. That inverts
+what used to be true: Confluence was the system of record, and this file existed
+so the repository could explain its own purpose without a network call. It still
+serves that purpose, but the proposal no longer needs a network call either.
+
+Edit the Markdown, review it in a pull request like any other change, then run
+`./tools/confluence-publish.sh`. The page carries a banner saying it is
+generated, and the script refuses to overwrite an edit made in the browser. See
+[`docs/confluence-access.md`](confluence-access.md).

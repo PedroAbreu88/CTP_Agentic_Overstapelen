@@ -10,6 +10,7 @@ expensive to acquire and is not recoverable from the code alone.
 | Document | Read it when |
 | --- | --- |
 | [`docs/product-context.md`](docs/product-context.md) | **Always, first.** What the Stack App is, the Dutch domain glossary, the two phases, and what is still undecided. Without it the repository does not explain its own purpose. |
+| [`docs/proposal.md`](docs/proposal.md) | Working on the proposal itself. This is the **source of truth**; the Confluence page is published from it by `./tools/confluence-publish.sh`. Never edit the Confluence page directly — the script will refuse to overwrite you, and the change is lost from review. |
 | [`docs/operations-context.md`](docs/operations-context.md) | Making product, UX or rollout decisions. Distilled from `RoyalAholdDelhaize/ah-product-toolkit`: where overstapelen sits in the AH process chain, who performs it (a ~92% flex workforce), which systems already hold the data, and who must agree before the floor changes. |
 | [`docs/ci-cd.md`](docs/ci-cd.md) | Touching delivery, environments, or anything deployed. Also documents constraints that shape application design. |
 | [`docs/confluence-access.md`](docs/confluence-access.md) | Before any Confluence call. Documents non-obvious failure modes that otherwise cost a long debugging cycle. |
