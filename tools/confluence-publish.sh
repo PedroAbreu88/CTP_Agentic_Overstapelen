@@ -22,7 +22,8 @@
 #   ./tools/confluence-publish.sh --force              # publish over a browser edit
 #   ./tools/confluence-publish.sh --file docs/x.md --page 123456
 #
-# The token is never printed and never passed as a command-line argument.
+# The token is never printed, and never appears on a command line -- curl reads
+# the credentials from a config file on stdin, so `ps` cannot see it.
 
 set -uo pipefail
 
@@ -57,13 +58,26 @@ done
 
 resolve_token() {
   if [ -n "${CONFLUENCE_TOKEN:-}" ]; then TOKEN="$CONFLUENCE_TOKEN"; TOKEN_SRC="\$CONFLUENCE_TOKEN"; return 0; fi
-  if TOKEN=$(security find-generic-password -s confluence-api-token -w 2>/dev/null) && [ -n "$TOKEN" ]; then
-    TOKEN_SRC="macOS Keychain (service 'confluence-api-token')"; return 0
+  # `security` is macOS-only. Probe for it rather than relying on 2>/dev/null,
+  # so this does not emit a command-not-found line on Linux or in CI.
+  if command -v security >/dev/null 2>&1; then
+    if TOKEN=$(security find-generic-password -s confluence-api-token -w 2>/dev/null) && [ -n "$TOKEN" ]; then
+      TOKEN_SRC="macOS Keychain (service 'confluence-api-token')"; return 0
+    fi
   fi
   if [ -s "$HOME/.confluence-token" ]; then
     TOKEN=$(tr -d '[:space:]' < "$HOME/.confluence-token"); TOKEN_SRC="~/.confluence-token"; return 0
   fi
   return 1
+}
+
+# Every call to Confluence goes through this. Credentials are handed to curl in
+# a config file on stdin rather than as -u on the command line, because command
+# lines are world-readable: `ps auxww` during a request would show the token to
+# any other user on the machine. `set -o pipefail` above means a failure in the
+# printf half of the pipe is not swallowed.
+cf_curl() {
+  printf 'user = "%s:%s"\n' "$EMAIL" "$TOKEN" | curl -K - "$@"
 }
 
 resolve_token || {
@@ -106,7 +120,7 @@ echo
 
 node "$REPO_ROOT/tools/md-to-storage.mjs" "$FILE" > "$TMP/converted.json" || exit 1
 
-CODE=$(curl -s -u "$EMAIL:$TOKEN" -H "Accept: application/json" \
+CODE=$(cf_curl -s -H "Accept: application/json" \
   "$BASE/api/v2/pages/$PAGE_ID?body-format=storage" \
   -o "$TMP/current.json" -w '%{http_code}')
 
@@ -203,7 +217,7 @@ RC=$?
 [ "$RC" -eq 3 ] && exit 0
 [ "$RC" -ne 0 ] && exit "$RC"
 
-CODE=$(curl -s -u "$EMAIL:$TOKEN" -X PUT \
+CODE=$(cf_curl -s -X PUT \
   -H "Content-Type: application/json" -H "Accept: application/json" \
   --data @"$TMP/put.json" \
   "$BASE/api/v2/pages/$PAGE_ID" \

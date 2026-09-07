@@ -10,6 +10,9 @@
 // Supported:
 //   #, ##, ###, ####      headings (a leading # is consumed as the page title)
 //   paragraphs            **bold**, _italic_, `code`, [text](url)
+//
+// Link targets must be http, https, mailto, or a relative path. Any other
+// scheme is a hard error rather than something to escape and hope about.
 //   - item                bullet list
 //   1. item               numbered list
 //   | a | b |             table, first row is the header
@@ -59,8 +62,30 @@ const fail = (lineNo, msg) => {
   process.exit(1);
 };
 
+// Escapes for both text and attribute contexts. Quotes matter: link targets are
+// interpolated into href="..." below, and storage format is XHTML, so a stray
+// quote does not just break the attribute -- it can inject markup into the page.
 const escapeHtml = (s) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+// Link targets: anything carrying a URL scheme must use one we trust. Relative
+// paths and anchors have no scheme and are always fine. Rejecting rather than
+// escaping an odd scheme is deliberate -- there is no legitimate reason for the
+// proposal to contain javascript: or data:, and a Markdown converter should not
+// be the component deciding which exotic schemes are safe.
+const SCHEME = /^([a-z][a-z0-9+.-]*):/i;
+const ALLOWED_SCHEMES = new Set(['http', 'https', 'mailto']);
+
+const linkIsSafe = (href) => {
+  const m = SCHEME.exec(href);
+  // A Windows-style "C:" or a stray "foo:bar" is not a relative path we want.
+  return m ? ALLOWED_SCHEMES.has(m[1].toLowerCase()) : true;
+};
 
 // Inline formatting. Code spans are lifted out first so their contents are
 // never treated as markup.
@@ -72,7 +97,15 @@ function inline(text, lineNo) {
   });
 
   s = escapeHtml(s);
-  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, href) => `<a href="${href}">${t}</a>`);
+  s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t, href) => {
+    // href is already escaped by escapeHtml above; decode only what we need to
+    // test the scheme, so an encoded "javascript&#58;" cannot slip past.
+    const probe = href.replace(/&amp;/g, '&').replace(/&#(\d+);/g, (_m, n) => String.fromCodePoint(Number(n)));
+    if (!linkIsSafe(probe)) {
+      fail(lineNo, `unsupported link scheme in "${probe}"; expected http, https, mailto, or a relative path`);
+    }
+    return `<a href="${href}">${t}</a>`;
+  });
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   s = s.replace(/(^|[\s(])_([^_]+)_(?=[\s.,;:)!?]|$)/g, '$1<em>$2</em>');
   s = s.replace(/\s--\s/g, ' \u2014 ');
@@ -83,6 +116,8 @@ function inline(text, lineNo) {
 }
 
 function cartGrid(rows, lineNo) {
+  if (rows.length === 0) fail(lineNo, 'empty cart-grid block; expected at least one row of cells');
+
   const streks = [];
   const grid = rows.map((r) => r.trim().split(/\s+/));
   const width = grid[0].length;
