@@ -106,11 +106,23 @@ code itself is trivial.
 ### Required output format
 
 Do **not** render the scores as a table. One block per option: a bold heading,
-then one indented bullet per variable, with the score in bold followed by an
-em dash and a short justification.
+then a line break and a short context paragraph explaining what the option
+actually is and what it would mean in practice, then one indented bullet per
+variable, with the score in bold followed by an em dash and a short
+justification.
+
+The context paragraph sits **between the heading and the scores**. It carries the
+information a reader needs to make the decision — what gets done, what it
+depends on, what changes as a result — so the scores are read as judgements
+about something already understood, not as the explanation itself.
 
 ```markdown
 **A — Short option name**
+
+  Register the vendor's MCP server in the app config so its tools are available
+  in every session. Needs a workspace admin to approve the integration and an
+  app restart before the tools appear.
+
   - **Recommend 8** — cleanest long-term integration, vendor-maintained.
   - **Complexity 3** — one config entry plus a browser login.
   - **Urgency 5** — start the approval request now, that is the slow part.
@@ -121,6 +133,9 @@ em dash and a short justification.
 Rules:
 
 - Never use a table for the scores.
+- Always include the context paragraph, on its own line between the heading and
+  the first variable. Two or three sentences at most — enough to decide on, not
+  a design document.
 - Always indent the variable lines under the option heading.
 - **Order options by `Recommend`, highest first.** The reader should meet the
   strongest option before the weaker ones.
