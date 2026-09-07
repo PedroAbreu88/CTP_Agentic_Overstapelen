@@ -119,7 +119,7 @@ direction**.
 
 The full reasoning, including what each rejected option would have cost, is
 recorded as an architecture decision record in the repository:
-`docs/decisions/0003-position-map-over-per-crate-scan.md`.
+`docs/decisions/0004-position-map-over-per-crate-scan.md`.
 
 ## Proposed solution -- Phase 2 (reject lane)
 

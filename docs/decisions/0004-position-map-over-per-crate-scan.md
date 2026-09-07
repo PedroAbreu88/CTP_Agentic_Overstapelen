@@ -1,4 +1,4 @@
-# 0003 — Read a cart position map from one scan, rather than scanning every crate
+# 0004 — Read a cart position map from one scan, rather than scanning every crate
 
 **Status:** Proposed
 **Date:** 2026-09-07
@@ -84,6 +84,15 @@ It should be confirmed or reversed after observing overstapelen at one manual an
 one mechanised HSC, against one question above all others: **do crates stay in
 their picked positions between picking and the strekkenplein?** If they do not,
 option (c) is the fallback and option (a) is the safe retreat.
+
+### Relationship to ADR 0003
+
+[ADR 0003](0003-pilot-cell-squad-shape.md) argues for a small pilot cell on the
+grounds that most of the work is blocked on evidence rather than capacity, and
+cites this question as the clearest example. **That argument is unchanged.** A
+proposed direction is not the evidence it asks for — the floor observation has
+still not happened, and until it does, staffing up to build against this remains
+building efficiently in a direction nobody has checked.
 
 ## Consequences
 

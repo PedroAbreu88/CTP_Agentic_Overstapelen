@@ -14,7 +14,7 @@ expensive to acquire and is not recoverable from the code alone.
 | [`docs/operations-context.md`](docs/operations-context.md) | Making product, UX or rollout decisions. Distilled from `RoyalAholdDelhaize/ah-product-toolkit`: where overstapelen sits in the AH process chain, who performs it (a ~92% flex workforce), which systems already hold the data, and who must agree before the floor changes. |
 | [`docs/ci-cd.md`](docs/ci-cd.md) | Touching delivery, environments, or anything deployed. Also documents constraints that shape application design. |
 | [`docs/confluence-access.md`](docs/confluence-access.md) | Before any Confluence call. Documents non-obvious failure modes that otherwise cost a long debugging cycle. |
-| [`docs/jira-access.md`](docs/jira-access.md) | Before any Jira call. Jira is on a **different Atlassian site** from Confluence; the doc also covers the project key and the two mandatory custom fields. |
+| [`docs/jira-access.md`](docs/jira-access.md) | Before any Jira call, and to see the project's current state. Jira is on a **different Atlassian site** from Confluence; the doc also covers the project key, the two mandatory custom fields, and the agentic team board that is the source of truth for what is in flight. |
 | [`docs/figma-access.md`](docs/figma-access.md) | Before reading the UI designs. Covers the file key, why we use the REST API rather than the MCP server, and the traps in the components/styles endpoints. |
 | [`docs/design-system.md`](docs/design-system.md) | Before proposing or building any UI. Generated inventory of the Armscanner Figma library — component sets, variants and semantic tokens. |
 | [`docs/ui-patterns.md`](docs/ui-patterns.md) | With the above, before proposing UI. How screens are *composed* — the three-region anatomy, the density budget, and the physical `P1`/`P2`/`P3` button bindings that are the primary input. |
@@ -206,6 +206,29 @@ On that last point: merging is not automatic.
 The failure mode worth naming: documentation written to orient future sessions is
 useless while it sits unmerged, because those sessions branch from the default
 branch and never see it.
+
+### Merge only your own session's pull request
+
+**Each session owns its own PR and nobody else's.** Several sessions often run
+in parallel against this repository, each with its own worktree, branch and open
+pull request. Finding another session's PR open, green and mergeable is not an
+invitation to merge it.
+
+The reasons are practical, not territorial:
+
+- The other session may still be working on it, and may push again after review
+  feedback or a failing check.
+- Its author knows things you do not — what was verified, what is deliberately
+  incomplete, what it is waiting on.
+- Squash-merging changes the base for every other in-flight branch, so merging
+  someone else's work can hand them a conflict they did not ask for.
+
+If another session's PR looks ready, or looks wrong, **say so and leave it**.
+The user can decide, or ask that session to act. The same applies to closing,
+retargeting, force-pushing, or editing another session's branch.
+
+When a question about merging is ambiguous, assume it refers to **this
+session's** PR.
 
 ### Publishing to Confluence is the user's call, not yours
 

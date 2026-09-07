@@ -62,7 +62,7 @@ Scanning *any* crate rather than a designated one is the point: no hunting for a
 particular crate, and one scan per cart rather than one per crate.
 
 Step 3 is a decision, not an obvious consequence — see
-[ADR 0003](decisions/0003-position-map-over-per-crate-scan.md). It is
+[ADR 0004](decisions/0004-position-map-over-per-crate-scan.md). It is
 **Proposed**, pending floor observation. The trade it accepts: speed and
 glanceability, at the cost of no per-crate audit trail and a dependency on
 crates staying in their picked positions.
@@ -136,7 +136,7 @@ of them. #1 now has a *proposed* answer in `docs/decisions/`, which is a
 direction to test on the floor, not a closure.
 
 1. ~~**Scan every crate, or read a position map from one scan?**~~ **Direction
-   proposed — not yet confirmed.** [ADR 0003](decisions/0003-position-map-over-per-crate-scan.md)
+   proposed — not yet confirmed.** [ADR 0004](decisions/0004-position-map-over-per-crate-scan.md)
    proposes the position map. It is *Proposed* rather than *Accepted* because it
    was settled by a draft design rather than by the floor observation this
    question asks for. The observation that would confirm it: **do crates stay in
