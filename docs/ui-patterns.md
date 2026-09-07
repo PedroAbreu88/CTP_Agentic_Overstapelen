@@ -17,14 +17,21 @@ the underlying reading with `./tools/figma-flow.sh <page pattern>`.
 This is the most important thing on this page, and it is invisible from the
 component inventory.
 
-The WT6400 has **three physical action buttons**, documented on the *Device
-button guidelines* page as:
+The *Device button guidelines* page documents **three physical action buttons**.
+The section is named `WT6400`, and there is no equivalent `WT6300` section in
+the file — so this is read from the WT6400 and **not yet confirmed for the
+WT6300**, which `docs/product-context.md` also lists as target hardware.
 
 | Key | Role |
 | --- | --- |
 | `P1` | Tertiary action / pagination |
 | `P2` | Secondary action |
 | `P3` | Primary action |
+
+Worth confirming with design whether the WT6300 shares this mapping. The screens
+themselves are drawn at both device sizes without distinguishing model, which
+suggests it is a general convention — but that is an inference, not something
+the file states.
 
 **Screens name the key in the button label**, in parentheses, as part of the
 visible text:
@@ -145,3 +152,13 @@ Blocked on the API rate limit, not on difficulty. In rough priority order:
 
 Fetch with `./tools/figma-flow.sh '00. System states|Break|Content guidelines'`
 when the rate limit allows.
+
+## Open questions for design
+
+- **Does the WT6300 share the WT6400's `P1`/`P2`/`P3` mapping?** The file
+  documents only the WT6400.
+- **Is the Picking flow undrawn or drawn elsewhere?** Two of its three pages are
+  empty.
+- **What is the overstapelen task icon?** The library has ~30 task types —
+  Picking, Counting, Mutating, Emballage and so on — and none for overstapelen,
+  strek or transfer. A new icon is a lead-time item.

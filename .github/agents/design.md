@@ -34,7 +34,8 @@ specification and let it implement.
   (tertiary/pagination), `P2` (secondary), `P3` (primary). Screens name the key
   in the visible label — `"Ja, ga verder (P3)"`. With both hands holding
   crates, the keys are the primary input and touch is the fallback. A proposal
-  with unbound actions is incomplete.
+  with unbound actions is incomplete. (Read from the WT6400 guidance; the
+  WT6300 mapping is unconfirmed.)
 - **Budget the screen.** The button bar is a fixed **72px** on both sizes and
   the status bar takes 16px, leaving **232px** of content at 534×320. Two
   buttons are 245px each; three leave ~160px, which is a short Dutch label and
