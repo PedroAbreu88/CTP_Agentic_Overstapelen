@@ -16,8 +16,9 @@ Three things constrain the answer, and only the first was obvious at the outset.
 map from a single scan — drives throughput, error rate and hardware needs.
 `docs/agent-operating-model.md` already concludes that agents started before it
 lands "will build the wrong thing efficiently". The same applies to people. It
-also notes that the seams (`web/`, `services/`, `deploy/base`) do not physically
-exist yet, so parallel work would collide in empty directories.
+also notes that the seams have no content — `web/` and `services/` do not exist
+at all, and `deploy/base` is an empty kustomize base — so parallel work would
+collide rather than divide.
 
 **Training is not available as a mitigation.** `docs/operations-context.md`
 records an 8:92 vast-to-flex split across HSC Fulfilment, with agency staff
