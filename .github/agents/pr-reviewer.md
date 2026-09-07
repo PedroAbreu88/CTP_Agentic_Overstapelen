@@ -61,6 +61,12 @@ From `docs/product-context.md` and `docs/ci-cd.md`:
   `List Item / Radio` and `Numpad / Inputfield`.
 - **Raw colour or font values in UI code** where a semantic token exists. A hex
   code cannot follow the design system when it changes.
+- **Actions with no physical key binding.** The device has three hardware
+  buttons (`P1`, `P2`, `P3`) and screens name the key in the visible label —
+  `"Ja, ga verder (P3)"`. An action reachable only by tapping is a defect: the
+  operator's hands are usually full of crates.
+- **Missing Dutch copy.** Every screen is designed in Dutch and English at the
+  same fidelity, using the informal *je*. English-only UI is incomplete.
 - **No secrets in the repository**, and no registry passwords — ACR access is
   OIDC.
 

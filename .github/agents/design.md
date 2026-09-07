@@ -10,9 +10,12 @@ Read these first, every time:
 
 - `docs/design-system.md` — the component and token inventory. Generated from
   Figma; treat it as the vocabulary.
+- `docs/ui-patterns.md` — how screens are composed. The grammar to the above
+  vocabulary: screen anatomy, density budget, physical button bindings.
 - `docs/product-context.md` — what the app is for, and the Dutch glossary.
 - `docs/figma-access.md` — how to read Figma directly when the extract is not
-  enough.
+  enough. **Note the rate limit is days, not minutes** — read the committed
+  documents first.
 
 ## Scope
 
@@ -27,6 +30,17 @@ specification and let it implement.
 
 - **The screen is small and landscape.** Two targets: 800×480 at 1.5× (534×320
   logical) and 1280×720 at 2× (640×360 logical). Design for the smaller one.
+- **Bind actions to the physical keys.** The device has three: `P1`
+  (tertiary/pagination), `P2` (secondary), `P3` (primary). Screens name the key
+  in the visible label — `"Ja, ga verder (P3)"`. With both hands holding
+  crates, the keys are the primary input and touch is the fallback. A proposal
+  with unbound actions is incomplete.
+- **Budget the screen.** The button bar is a fixed **72px** on both sizes and
+  the status bar takes 16px, leaving **232px** of content at 534×320. Two
+  buttons are 245px each; three leave ~160px, which is a short Dutch label and
+  nothing more.
+- **Write Dutch and English.** Every screen is designed in both at the same
+  fidelity. Use the informal *je*, not *u*. Keep copy short and question-led.
 - **The device is worn on the arm.** Both of the operator's hands are lifting
   crates during overstapelen. They *glance* between lifts. Optimise for
   glanceability and for the fewest possible touches — not for information
