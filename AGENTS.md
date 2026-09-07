@@ -10,6 +10,7 @@ expensive to acquire and is not recoverable from the code alone.
 | Document | Read it when |
 | --- | --- |
 | [`docs/product-context.md`](docs/product-context.md) | **Always, first.** What the Stack App is, the Dutch domain glossary, the two phases, and what is still undecided. Without it the repository does not explain its own purpose. |
+| [`docs/operations-context.md`](docs/operations-context.md) | Making product, UX or rollout decisions. Distilled from `RoyalAholdDelhaize/ah-product-toolkit`: where overstapelen sits in the AH process chain, who performs it (a ~92% flex workforce), which systems already hold the data, and who must agree before the floor changes. |
 | [`docs/ci-cd.md`](docs/ci-cd.md) | Touching delivery, environments, or anything deployed. Also documents constraints that shape application design. |
 | [`docs/confluence-access.md`](docs/confluence-access.md) | Before any Confluence call. Documents non-obvious failure modes that otherwise cost a long debugging cycle. |
 | [`docs/jira-access.md`](docs/jira-access.md) | Before any Jira call. Jira is on a **different Atlassian site** from Confluence; the doc also covers the project key and the two mandatory custom fields. |
