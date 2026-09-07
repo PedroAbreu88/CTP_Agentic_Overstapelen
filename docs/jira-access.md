@@ -74,6 +74,33 @@ recent AODB issues use *Devices and Apps - Delivery app*; overstapelen is an HSC
 fulfillment process on an arm scanner and is explicitly **not** the delivery
 app, so it belongs to *Devices and Apps - Fulfillment 1*.
 
+**NL CTP Team Name cannot be left empty.** It is required by the field
+configuration, so creation fails without it — and it cannot be cleared
+afterwards either. Both of these `PUT` bodies against
+`/rest/api/2/issue/AODB-12345` return `400 "NL CTP Team Name is required"`:
+
+```json
+{ "fields": { "customfield_12002": null } }
+```
+
+```json
+{ "update": { "customfield_12002": [ { "set": null } ] } }
+```
+
+`editmeta` agrees, reporting the field as `"required": true` with `set` as its
+only operation:
+
+```bash
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/api/2/issue/AODB-12345/editmeta"
+```
+
+Only a Jira admin can change that. There is no "none" or "unassigned" option in
+the dropdown.
+
+This matters because the team field is one of two things that decide which boards
+an issue appears on — see *The board* below for the other.
+
 ### Prefer API v2 for the description
 
 `/rest/api/3/issue` requires the description in **Atlassian Document Format** — a
@@ -90,6 +117,73 @@ curl -s -u "you@ah.nl:$TOKEN" \
 
 `201` returns the new issue key.
 
+## The board
+
+The project's current state lives on **board 24968 — *Devices & Apps - agentic
+team*** (kanban, filter `67634`):
+
+<https://jira-eu-aholddelhaize.atlassian.net/jira/software/c/projects/AODB/boards/24968>
+
+Its filter is the non-obvious part:
+
+```jql
+project = AODB
+AND labels = "D&Aagenticteam"
+AND "nl ctp team name[dropdown]" IN ("Devices and Apps - Delivery app", "Devices and Apps - Fulfillment 1")
+ORDER BY created DESC
+```
+
+**The label is what distinguishes this board.** Its two sibling boards select on
+the team field alone, so the wrong assumption is easy to make:
+
+| Board | Filter | Selects on |
+| --- | --- | --- |
+| 24968 *Devices & Apps - agentic team* | `67634` | `D&Aagenticteam` label **and** team in {Delivery app, Fulfillment 1} |
+| 4212 *Devices & Apps - Fulfillment Apps* | `39833` | team = *Devices and Apps - Fulfillment 1* |
+| 4214 *Devices & Apps - Delivery Apps* | `28235` | team = *Devices and Apps - Delivery app* |
+
+So an issue for this project needs **both**:
+
+- `labels: ["D&Aagenticteam"]` — without it the issue never reaches the agentic
+  board. Note the `&` and the capitalisation; labels are exact-match.
+- `customfield_12002: "Devices and Apps - Fulfillment 1"` — mandatory anyway
+  (see above), and the correct team for overstapelen.
+
+The consequence is that every issue also appears on board 4212. That is expected,
+not a mistake.
+
+> This filter has been edited at least once during the project — an earlier
+> version omitted the team clause entirely. Read it rather than trusting the
+> table above:
+
+```bash
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/agile/1.0/board/24968/configuration"
+# then, with the filter id from .filter.id:
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/api/2/filter/67634"
+```
+
+To confirm an issue actually landed on the board, query the board rather than the
+project — that tests the real filter:
+
+```bash
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" -G \
+  --data-urlencode 'jql=key=AODB-12345' \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/agile/1.0/board/24968/issue"
+```
+
+### Stories are the source of truth for state
+
+The board records **what exists, what is in flight, and what is done**. It is the
+authoritative answer to "where is the project now".
+
+It is *not* the place for reasoning. Why something is built a particular way
+belongs in `docs/`, and contested choices in `docs/decisions/` — a design
+rationale buried in a Jira comment is invisible from the repository and to a new
+agent session. Link the two directions: reference the issue key from a commit or
+PR, and reference the document from the issue.
+
 ## Statuses
 
 There is **no "To Do"** status. New Story issues open in **`Backlog`**, which is
@@ -103,4 +197,6 @@ are `Refinement` and `To Refine`.
 | `404 "Page not found"` on `/rest/api/3/...` | You called the Confluence host. Jira is on `jira-eu-…`. |
 | `404 "Site temporarily unavailable"` | That Atlassian site does not exist. Not a transient error. |
 | `400` on issue creation | A mandatory custom field is missing — check `createmeta`. |
+| `400 "NL CTP Team Name is required"` on edit | You tried to clear the team. It cannot be emptied; only an admin can relax the field configuration. |
+| Issue created but absent from the agentic board | Missing or misspelled `D&Aagenticteam` label, or a team outside the two the board's filter allows. |
 | Description renders as literal JSON | You posted ADF to v2, or a plain string to v3. |
