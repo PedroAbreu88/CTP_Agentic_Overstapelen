@@ -11,7 +11,7 @@ itself.
 
 ## Provenance
 
-| | |
+| Field | Value |
 | --- | --- |
 | Source repository | [`RoyalAholdDelhaize/ah-product-toolkit`](https://github.com/RoyalAholdDelhaize/ah-product-toolkit) (internal) |
 | Files read | `context/context-hsc-processes.md`, `context/context-hsc-processes-detail.md`, `context/context-persona-e-commerce-operations.md` |
