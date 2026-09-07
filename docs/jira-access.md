@@ -76,11 +76,27 @@ app, so it belongs to *Devices and Apps - Fulfillment 1*.
 
 **NL CTP Team Name cannot be left empty.** It is required by the field
 configuration, so creation fails without it — and it cannot be cleared
-afterwards either. `PUT` with `{"customfield_12002": null}` and the
-`{"update": {...[{"set": null}]}}` form both return `400 "NL CTP Team Name is
-required"`, and `editmeta` reports the field as `required: true` with only a
-`set` operation. Only a Jira admin can change that. There is no "none" or
-"unassigned" option in the dropdown.
+afterwards either. Both of these `PUT` bodies against
+`/rest/api/2/issue/AODB-12345` return `400 "NL CTP Team Name is required"`:
+
+```json
+{ "fields": { "customfield_12002": null } }
+```
+
+```json
+{ "update": { "customfield_12002": [ { "set": null } ] } }
+```
+
+`editmeta` agrees, reporting the field as `"required": true` with `set` as its
+only operation:
+
+```bash
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/api/2/issue/AODB-12345/editmeta"
+```
+
+Only a Jira admin can change that. There is no "none" or "unassigned" option in
+the dropdown.
 
 This matters because the team field is one of two things that decide which boards
 an issue appears on — see *The board* below for the other.
