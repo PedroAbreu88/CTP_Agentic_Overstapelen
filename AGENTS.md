@@ -15,6 +15,7 @@ expensive to acquire and is not recoverable from the code alone.
 | [`docs/jira-access.md`](docs/jira-access.md) | Before any Jira call. Jira is on a **different Atlassian site** from Confluence; the doc also covers the project key and the two mandatory custom fields. |
 | [`docs/figma-access.md`](docs/figma-access.md) | Before reading the UI designs. Covers the file key, why we use the REST API rather than the MCP server, and the traps in the components/styles endpoints. |
 | [`docs/design-system.md`](docs/design-system.md) | Before proposing or building any UI. Generated inventory of the Armscanner Figma library — component sets, variants and semantic tokens. |
+| [`docs/ui-patterns.md`](docs/ui-patterns.md) | With the above, before proposing UI. How screens are *composed* — the three-region anatomy, the density budget, and the physical `P1`/`P2`/`P3` button bindings that are the primary input. |
 | [`docs/decisions/`](docs/decisions/) | Before revisiting a settled architectural choice, and when making one worth recording. |
 | [`docs/agent-operating-model.md`](docs/agent-operating-model.md) | Before starting component work, or when deciding which agent should do something. Defines the `web` / `services` / `platform` split, the shared API seam, and how review works. |
 

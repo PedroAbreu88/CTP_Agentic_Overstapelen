@@ -51,13 +51,21 @@ The UI designs live in Figma: **Armscanner — UI designs**, file key
 
 <https://www.figma.com/design/XMc8Glk3X9V3xh1uEiYoRe/Armscanner---UI-designs>
 
-**Read `docs/design-system.md` before building UI.** It is a generated inventory
-of the library's 643 published components and 167 semantic tokens, and it needs
-no Figma token. Name components and tokens from it rather than inventing them,
-and never use anything it marks `[OLD]`.
+**Read `docs/design-system.md` and `docs/ui-patterns.md` before building UI.**
+The first is a generated inventory of the library's 643 published components and
+167 semantic tokens; the second is how screens are composed. Neither needs a
+Figma token. Name components and tokens from them rather than inventing, and
+never use anything marked `[OLD]` or `[RETIRED]`.
 
 The screen is **534×320 logical** (800×480 at 1.5×) on the smaller target, and
-landscape. Design for that one.
+landscape. Design for that one. The button bar is a fixed 72px.
+
+**Bind actions to the physical keys.** The device has three — `P1`, `P2`, `P3` —
+and screens name the key in the visible label, e.g. `"Ja, ga verder (P3)"`. The
+operator's hands are usually full, so the keys are the primary input and touch
+is the fallback. Implement key handling, not just tap handlers.
+
+Every screen needs **Dutch and English** copy, using the informal *je*.
 
 For the designs themselves, or anything the inventory does not cover, see
 `docs/figma-access.md` — which also explains why this project uses the REST API

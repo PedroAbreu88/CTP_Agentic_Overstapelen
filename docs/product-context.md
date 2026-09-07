@@ -95,6 +95,13 @@ designs.
 - **The screen is small and landscape.** Two targets, per the designs:
   **800×480 at 1.5×** (534×320 logical) and **1280×720 at 2×** (640×360
   logical). Design for the smaller. The hardware is Zebra WT6300 / WT6400.
+- **The device has three physical action buttons**, `P1`, `P2` and `P3`, mapped
+  to tertiary/pagination, secondary and primary actions. Screens name the key
+  in the button label — `"Ja, ga verder (P3)"`. With both hands holding crates,
+  the keys are the primary input and touch is the fallback. See
+  `docs/ui-patterns.md`.
+- **The UI is bilingual.** Every screen is designed in Dutch and English at the
+  same fidelity, using the informal *je* rather than *u*.
 - **Scanning happens with gloves, in the cold, at speed.** This is not a desktop
   application, and it is not a phone app used at leisure.
 
