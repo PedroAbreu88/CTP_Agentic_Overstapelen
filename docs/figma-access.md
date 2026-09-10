@@ -35,6 +35,18 @@ All three share `tools/figma-lib.sh`, which reports the `retry-after` header on
 a `429` — so a rate limit tells you when it clears instead of leaving you to
 guess.
 
+**Known limitation of `figma-flow.sh`: it only reports frames matching a device
+size** (534×320 or 640×360). A page whose frames are any other size prints
+nothing at all, which is indistinguishable from an empty page. This hid the
+`↳ Content guidelines` glossary for a week. When a page looks empty and you
+expected content, confirm with:
+
+```bash
+# Does the page really have no children, or just no device-sized frames?
+curl -s -H "X-Figma-Token: $TOKEN" \
+  "https://api.figma.com/v1/files/XMc8Glk3X9V3xh1uEiYoRe/nodes?ids=17:4&depth=2"
+```
+
 For the component vocabulary, prefer `docs/design-system.md` over either
 script: it is committed, needs no token, and costs no API call.
 
@@ -143,6 +155,11 @@ A third, learned the expensive way: **the full designs file is 33 MB.** Never
 
 ## Rate limits
 
+**Status: lifted on 2026-09-10.** The account was moved to a Dev/Full seat and
+the API now behaves normally — five calls in ninety seconds, no `429`. The
+history below is kept because it explains the shape of this document, and
+because the failure mode returns instantly if the seat is ever downgraded.
+
 Figma returns `{"status":429,"err":"Rate limit exceeded"}` — and, crucially,
 **tells you exactly how long you are blocked for in the response headers.**
 Nothing in the body says so. Always look at the headers:
@@ -167,27 +184,47 @@ the restriction comes from the **seat**, not the organisation's plan.
 
 Figma's own guidance is that Starter plans and **View or Collab seats** get
 severely reduced API access, while **Dev or Full seats** on a paid plan get
-normal per-minute limits. The observed behaviour matches: a single expensive
-call bought a multi-day block, and even two small calls after six days of
-inactivity triggered another.
+normal per-minute limits. The observed behaviour matched exactly: a single
+expensive call bought a multi-day block, and even two small calls after six days
+of inactivity triggered another.
 
-**This is the single most important constraint on working with Figma here.**
-Until the seat changes, treat the API as something you may touch a handful of
-times per week, not per session.
+**The seat was upgraded on 2026-09-10 and the symptom disappeared immediately** —
+which confirms the diagnosis retrospectively. It was the seat, not the plan, not
+the token, and not anything about how the calls were made.
 
-Practical consequences:
+### What it cost, and the calibration to remember
 
-- **Read `docs/design-system.md` instead.** It is committed, needs no token,
-  and costs nothing. This is why it exists.
+Worth keeping, because it is the evidence for acting quickly if it recurs:
+
+| Date | Event | Block |
+| --- | --- | --- |
+| 3 Sep | One `GET /v1/files/:key` without `depth` (33 MB) | 3.4 days |
+| 7 Sep | One session of `/nodes` frame reads → `docs/ui-patterns.md` | ~4 days |
+| 10 Sep | Blocked again; seat upgraded; retried | none since |
+
+Two things that were not obvious and cost real time:
+
+- **One session's worth of frame reads costs roughly a four-day block** on a low
+  seat. Not "a few calls per hour" — the budget is effectively weekly.
+- **When blocked, do not assume a cheap call will get through.** A 13 KB
+  `?depth=1` page list failed exactly like the 33 MB one, so there is no
+  small-request carve-out. Buckets are roughly per-endpoint but not independent:
+  on 3 Sep `/components` and `/styles` still answered while `/v1/files/:key` was
+  blocked, yet enough `/nodes` calls exhausted that bucket too. Budget the
+  session, not the endpoint — and if you need to know whether the API is
+  available, run the call you actually wanted rather than a probe.
+
+The habits below were adopted under the limit. **Keep them anyway** — they were
+good practice before the limit and remain so:
+
+- **Read `docs/design-system.md` instead** where it answers the question. It is
+  committed, needs no token, and costs nothing.
 - Always pass `?depth=1`, or use `/nodes?ids=`, unless you genuinely need the
   entire tree. **`?depth=1` on the designs file is 13 KB; the same call without
-  `depth` is 33 MB** — and that one call caused the multi-day block.
+  `depth` is 33 MB.**
 - Fetch each endpoint once and reuse the response from disk.
-- **Never retry on a hunch.** Read `retry-after` and believe it.
-- The buckets are roughly per-endpoint but not independent: `/components` and
-  `/styles` kept working while `/v1/files/:key` was blocked, yet enough
-  `/nodes` calls exhausted that bucket too. Budget the session, not the
-  endpoint.
+- **Never retry on a hunch.** Read `retry-after` and believe it. A stated reason
+  to expect different behaviour — such as a seat change — is not a hunch.
 
 ## Node IDs — `0:1` is not the document
 
@@ -206,9 +243,9 @@ That is the only reliable route, and at 13 KB it is cheap.
 | `403` on `/v1/me` | Token is expired, revoked, or lacks the scope. Not a file permission problem. |
 | `403` on a file | The token is valid but that account cannot see the file. |
 | `404` on a file | Wrong file key — check for a copied URL fragment or a `branch` key. |
-| `403` on `/variables/local` | Needs an Enterprise plan **and** a Dev or Full seat. Derive tokens from published styles instead. |
+| `403` on `/variables/local` | Needs an Enterprise plan **and** a Dev or Full seat. Since the 2026-09-10 seat upgrade this **may now succeed** — untested. If it does, it is the authoritative source for raw token values. |
 | Empty `components` list | Wrong file — you queried the designs file, not the library. |
-| `429 Rate limit exceeded` | Read the `retry-after` header — it is authoritative and has been as long as **3.4 days**. See [Rate limits](#rate-limits). |
+| `429 Rate limit exceeded` | Should no longer occur since the 2026-09-10 seat upgrade. If it does, the seat has changed — read the `retry-after` header, which is authoritative and has been as long as **3.4 days**. See [Rate limits](#rate-limits). |
 
 ## What the designs are for
 
