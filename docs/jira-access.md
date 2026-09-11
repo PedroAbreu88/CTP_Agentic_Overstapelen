@@ -225,6 +225,47 @@ Two practical consequences:
 value, so a Story cannot be converted to a Feature through the edit API. The UI's
 *Move* operation is a different, more privileged path.
 
+### Linking issues — the direction is the opposite of what it reads like
+
+`POST /rest/api/2/issueLink` takes `inwardIssue` and `outwardIssue`, and the
+relationship reads:
+
+> **`inwardIssue`** *&lt;outward description&gt;* **`outwardIssue`**
+
+So to record "AODB-1 **blocks** AODB-2", the *blocker* goes in `inwardIssue`:
+
+```json
+{
+  "type": { "name": "Blocks" },
+  "inwardIssue":  { "key": "AODB-1" },
+  "outwardIssue": { "key": "AODB-2" }
+}
+```
+
+Getting this backwards is silent — the link is created successfully and reads
+plausibly in the UI, just pointing the wrong way. Always read it back before
+trusting it:
+
+```bash
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/api/2/issue/AODB-1?fields=issuelinks"
+```
+
+A link is deleted by its own id, not by the issues it joins:
+`DELETE /rest/api/2/issueLink/{linkId}`.
+
+Useful types in this instance — list them all at `/rest/api/2/issueLinkType`:
+
+| Type | Outward | Inward |
+| --- | --- | --- |
+| `Work item split` | split to | split from |
+| `Blocks` | blocks | is blocked by |
+| `Relates` | relates to | relates to |
+| `Dependency` | depends on | is needed for |
+
+`Work item split` is the right type when one ticket is broken into several —
+it says *why* the siblings exist, which `Relates` does not.
+
 ## The board columns
 
 Board 24968's column → status mapping, read on 2026-09-11 **after** the
@@ -279,3 +320,4 @@ curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
 | Description renders as literal JSON | You posted ADF to v2, or a plain string to v3. |
 | A card will not drag into a column | That column's statuses are not in the issue type's workflow. Check `/project/AODB/statuses`, not permissions. |
 | A transition ID exists but returns `400` | Transitions are per-issue and per-status. Re-read `/issue/{key}/transitions` from the *current* status. |
+| An issue link points the wrong way | `inwardIssue` takes the *outward* description. The blocker goes in `inwardIssue`. Fails silently — read it back. |
