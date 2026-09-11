@@ -1,7 +1,8 @@
 # 0004 — Read a cart position map from one scan, rather than scanning every crate
 
-**Status:** Proposed
-**Date:** 2026-09-07
+**Status:** Accepted — provisionally, on recorded assumptions. See
+[Accepted provisionally, 2026-09-11](#accepted-provisionally-2026-09-11).
+**Date:** 2026-09-07 (proposed), 2026-09-11 (accepted)
 
 ## Context
 
@@ -70,6 +71,12 @@ because it is the cheapest available correction, and it only stays cheap if
 Phase 1 does not architect it away — see *Consequences*.
 
 ## Decision
+
+> **Superseded on 2026-09-11.** This section records the original *Proposed*
+> decision and is kept for the reasoning. The status is now **Accepted,
+> provisionally** — see [Accepted provisionally,
+> 2026-09-11](#accepted-provisionally-2026-09-11) for what changed and on which
+> assumptions.
 
 **Proposed:** option (b), the position map, for Phase 1.
 
@@ -175,3 +182,69 @@ from an established pattern** rather than the only available shape, so:
 The `Mapped Up Scan down` variant is worth understanding before treating option
 (b) as settled: it describes a per-position scanning interaction, which is closer
 to option (c) than to (b). Someone has already drawn part of the fallback.
+
+## Accepted provisionally, 2026-09-11
+
+**Decision: option (b) is Accepted for Phase 1, on the assumptions listed below,
+pending floor confirmation.**
+
+Be clear about what changed, because it is *not* that the evidence arrived. The
+original source brief and the draft screen it describes were read in full on
+2026-09-11 (the screen is reproduced at
+[`../images/draft-position-map.png`](../images/draft-position-map.png), and the
+brief is summarised in `docs/product-context.md`). They answered two of the four
+questions that were blocking the design of screen 3 — but they are the *origin*
+of the position-map hypothesis, not independent support for it. Re-reading the
+document that proposed something cannot confirm it.
+
+What changed is the **posture**, taken deliberately: we accept the assumption
+risk now so that design and specification work can proceed, rather than holding
+seven unblocked screens hostage to a floor visit that has not been scheduled.
+That is a judgement about sequencing, not a claim that the question is answered.
+
+Recording it this way — Accepted, with the assumptions enumerated and a named
+reversal trigger — is the honest form. The failure mode this ADR was written to
+prevent was an assumption **made in a drawing and never written down**. Writing
+it down is the mitigation; refusing to proceed was never the only one.
+
+### The assumptions we are now building on
+
+Each is provisional. Each is a thing the floor visit must check.
+
+| # | Assumption | Source | If false |
+| --- | --- | --- | --- |
+| A1 | Crates stay in their picked positions between picking and the strekkenplein | Assumed by the draft; never observed | Option (c), then (a). This is the load-bearing one. |
+| A2 | A picking cart has **18 positions**, in a 3×6 grid | Counted from the draft screen | Layout and legibility budget change; ≤8 is easier, >18 breaks the no-paging assumption |
+| A3 | A cart typically spans about **4 streks** | Four distinct values (5, 6, 7, 9) in the draft | Beyond ~4, colour stops distinguishing and the number carries it alone |
+| A4 | The operator approaches the cart from a consistent end, and the drawn cart graphic resolves the rest | Draft anchors with a wheel and handle | Mirrored maps; needs an orientation confirmation step |
+| A5 | Position carries a **weight flag** (`> 10kg`) alongside the strek number | Legend and per-cell warning triangles in the draft | Cell design has spare room; no loss |
+
+A2 in particular contradicts something this repository previously asserted.
+`docs/phase-1-screens.md` warned that at 18 positions "the strek numbers stop
+being readable within the 232px content region". The draft renders 18 positions
+at approximately device proportions and they are legible. **The density concern
+was overstated**, and that correction is worth keeping — it was an inference
+presented with more confidence than it had earned.
+
+### What reverses this
+
+Unchanged from the original decision, and now the only question that blocks it:
+
+> **Do crates stay in their picked positions between picking and the
+> strekkenplein?**
+
+Observed at one manual and one mechanised HSC. If they do not, option (c) is the
+fallback and option (a) is the safe retreat. Every *Consequences* item above
+still applies — in particular **keep the confirmation step reachable**, which is
+what keeps this decision affordable to get wrong.
+
+### What this does not change
+
+- **ADR 0003 still stands.** Accepting a direction provisionally is not the
+  evidence it asks for. The floor observation has still not happened, so staffing
+  up to build against this is still building efficiently in an unchecked
+  direction.
+- **The `Verify_load_carrier` question is still open.** Design still owes us an
+  answer to *why a map rather than the established list*. Accepting (b) does not
+  retire that; it just stops it blocking specification work.
+
