@@ -42,7 +42,7 @@ interruption to it.
 | --- | --- | --- | --- |
 | 1 | **Scan prompt** | Resting state. Tells the operator to scan any crate on the cart. | **Ready** — `Collect_default` is the model |
 | 2 | **Scanning / resolving** | Feedback between scan and answer. May be sub-second and not a screen at all. | **Ready** |
-| 3 | **Position map** | The cart drawn as positions, each showing its strek. The core screen. | **Blocked** — ADR 0004 unconfirmed, *and* cart geometry |
+| 3 | **Position map** | The cart drawn as positions, each showing its strek. The core screen. | **Ready, provisionally** — ADR 0004 accepted on assumptions; see below |
 | 4 | **Cart complete** | Confirms the cart is empty and returns to (1). | **Ready** — `Verify_load_carrier` is the model |
 | 5 | **Unknown crate** | Scanned crate resolves to no cart. | **Ready** — follow the error toast |
 | 6 | **Wrong cart** | Scanned crate belongs to a different cart than the one in progress. | **Ready** — follow the error toast |
@@ -51,9 +51,9 @@ interruption to it.
 | 9 | **Interruptions** | Break, quit, resume, freezer check. | **Ready** — reuse, do not invent |
 | 10 | **Onboarding** | Three-screen introduction, shown on first use. | **Ready** — house pattern, see below |
 
-Seven of ten are ready to specify. The three that are not are the ones that
-matter: the position map is the product, and screens 7 and 8 are the difference
-between an app the floor trusts and one it works around.
+Seven of ten are ready to specify, and screen 3 is provisionally ready as of
+2026-09-11. The two that are not are screens 7 and 8 — the difference between an
+app the floor trusts and one it works around.
 
 **Screen 10 was not in the first version of this list, and should have been.**
 Every flow in the designs file ships `Onboarding_1/2/3` — a three-screen
@@ -64,38 +64,77 @@ deliberate departure from house style. It is also entirely unblocked.
 
 ## What each blocker actually is
 
-### Screen 3 — an unconfirmed decision, and two numbers nobody has
+### Screen 3 — provisionally unblocked, on recorded assumptions
 
-**First, this screen may not be the right screen at all** — and there are now
-two reasons rather than one.
+**Updated 2026-09-11.** The original source brief and its draft screen were read
+in full. They answer enough of what was blocking this screen that
+[ADR 0004](decisions/0004-position-map-over-per-crate-scan.md) has moved to
+**Accepted, provisionally** — and the assumptions that acceptance rests on are
+enumerated there, as A1–A5.
 
-ADR 0004 is *Proposed*, not *Accepted*. It is confirmed or reversed by observing
-whether crates stay in their picked positions between picking and the
-strekkenplein. If they do not, option (c) — a confirming scan per strekkar —
-becomes the design, and option (a) is the safe retreat.
+Be precise about what happened, because it is easy to overstate. The brief and
+the draft are the **origin** of the position-map direction, not independent
+evidence for it. What changed is that we chose to build against the direction
+while the floor question remains open, rather than hold the screen. The
+assumptions are written down; that is the mitigation.
 
-**And the design system already answers a nearby question differently.**
-`Verify_load_carrier` confirms the contents of a load carrier as a scrolling
-list with a checkbox, not a spatial map. The map may still be right — *where a
-crate goes* is a different question from *what is on the cart*, and only the
-first needs to be glanceable — but it is now a departure from an established
-pattern, and any proposal has to say why the list is insufficient.
+![The draft position map](images/draft-position-map.png)
 
-**Second, two numbers.** How many positions does a picking cart have, and how
-many streks does a cart typically span? Neither is recorded anywhere in this
-repository.
+#### Settled enough to specify against
 
-They are not detail. At 8 positions the map is glanceable at a distance; at 18
-the strek numbers stop being readable within the 232px content region, and
-either the no-paging assumption or the whole position-map approach has to give.
-The strek spread decides whether colour can group positions at all — beyond
-about four streks, adjacent hues stop being distinguishable in a cold, glare-lit
-aisle, and the number has to carry the meaning alone.
+- **18 positions, in a 3×6 grid.** Counted from the draft.
+- **About 4 streks per cart.** Four distinct values in the example.
+- **Colour and number together.** Every cell carries both. The number is
+  load-bearing and must never be dropped — see ADR 0004 *Consequences*.
+- **Orientation via the drawn cart.** Wheel and handle at the right edge.
+- **A `> 10kg` weight flag per position**, with a legend at the top of the
+  content region. This is new information: a position carries **two** attributes,
+  not one.
 
-Also unresolved, and cheaper to answer: **does the operator always approach the
-cart from the same end?** ADR 0004 names cart orientation as
-correctness-critical, because a mirrored map is wrong in a way that looks
-entirely plausible.
+#### A correction worth keeping
+
+An earlier version of this document warned that at 18 positions "the strek
+numbers stop being readable within the 232px content region", and used that to
+argue the whole approach might have to give. **The draft renders 18 positions at
+roughly device proportions and they are perfectly legible.** The concern was an
+inference stated with more confidence than it had earned, and the number it
+worried about turns out to be the actual number.
+
+The colour claim held up better: four streks is right at the boundary where
+adjacent hues stay distinguishable, which is why the double-encoding matters.
+
+#### Still open
+
+- **A1 — do crates stay in their picked positions?** Unchanged, unobserved, and
+  still the thing that reverses the decision. Now the *only* blocker rather than
+  one of four.
+- **Why a map rather than `Verify_load_carrier`?** Design still owes an answer.
+  Accepting ADR 0004 stops this blocking specification; it does not retire it.
+- **Does the operator approach from a consistent end?** The drawn cart handles
+  *conveying* orientation; it does not establish that orientation is stable.
+- **Is this screen also screen 4?** The draft's button bar reads
+  `← Close (P2)` / `→ Finished (P3)`, so completion may be an action on the map
+  rather than a separate screen. See the note under screen 4 below.
+- **What are the three dots at the left of the button bar?** If that is
+  `_🖇️Pagination - Pantry`, the draft is already paging something, which would
+  contradict the no-paging assumption in `docs/ui-patterns.md`. Confirm before
+  building on either reading.
+
+### Screen 4 — may not be a separate screen
+
+Added 2026-09-11. The draft position map carries `→ Finished (P3)` in its own
+button bar, which suggests cart completion is an **action on the map** rather
+than a screen of its own.
+
+If that holds, screens 3 and 4 merge and `Verify_load_carrier` stops being the
+model — the map already shows the contents, so a second contents screen is
+redundant. If it does not hold, `Finished (P3)` is simply the transition *into*
+screen 4 and the inventory is unchanged.
+
+Cheap to settle and worth settling early, because it changes whether the
+confirming interaction has anywhere to live. ADR 0004 requires that "how
+completion is confirmed" stays a reachable step in the flow rather than an
+assumption baked into the screen — merging 3 and 4 must not quietly remove it.
 
 ### Screens 5–7 — the error convention already exists
 
@@ -139,6 +178,11 @@ being confirmed. They are the frame around the map: how the operator learns the
 flow, starts it, knows the app heard them, recovers from a bad scan, finishes,
 and takes a break.
 
+**Screen 3 joined them on 2026-09-11**, provisionally — see above. It is the only
+one whose specification carries assumption risk, so specify it last and mark the
+numbers it depends on. The frame screens are safe regardless of how the floor
+visit goes; the map is not.
+
 **Almost all of them now have a named model to copy**, which was not true when
 this document was first written:
 
@@ -175,14 +219,25 @@ question is which dialog components are current, since some of those screens use
 
 ## Questions this raises
 
+**Updated 2026-09-11.** The source brief and draft screen answered several of
+these provisionally. Answered ones are struck through with the working answer
+recorded — they are assumptions to verify on the floor, not closed questions.
+See ADR 0004 A1–A5.
+
 For the floor visit:
 
-1. How many positions does a picking cart have?
-2. How many streks does a typical cart span?
+1. ~~How many positions does a picking cart have?~~ **Assume 18 (3×6).** Verify.
+2. ~~How many streks does a typical cart span?~~ **Assume about 4.** Verify — the
+   colour encoding stops working much beyond this.
 3. Do crates stay in their picked positions between picking and the
-   strekkenplein? (ADR 0004's confirming question.)
-4. Is the cart always approached from the same end?
+   strekkenplein? (ADR 0004's confirming question — **still open, and still the
+   one that reverses the decision**.)
+4. ~~Is the cart always approached from the same end?~~ **Assume yes**, with the
+   drawn cart as the landmark. Verify — a mirrored map fails silently.
 5. Can two operators work the same strekkenplein simultaneously?
+11. Are heavy crates (`> 10kg`) common enough that flagging roughly half the
+    positions, as the draft does, still carries meaning? A warning on everything
+    is a warning on nothing.
 
 For design:
 
@@ -194,10 +249,19 @@ For design:
    for, and does a cart-mapping screen exist anywhere we have not looked?
 9. **Why is a position map better than `Verify_load_carrier`?** Design has
    already solved "confirm the contents of a load carrier" as a list. We should
-   be able to answer this before proposing a map.
+   be able to answer this before proposing a map. **Still open** — ADR 0004 being
+   accepted does not answer it.
 10. What are the agreed NL/ENG terms for `strek`, `strekkar` and
     `strekkenplein`? `kar` and `ladingdrager` are already established.
+12. What are the three dots at the left of the draft's button bar? If it is
+    `_🖇️Pagination - Pantry`, something is paging and `docs/ui-patterns.md` is
+    wrong about this flow.
+13. Is `Finished (P3)` an action on the map, or the transition into a separate
+    screen 4?
 
 For Operations:
 
 8. What is the agreed fallback when the app is unavailable?
+14. Where does the per-crate weight come from, and is it reliable enough to
+    present as a safety signal?
+15. Is the manual HSC in Phase 1 scope, or is the pilot mechanised-only?

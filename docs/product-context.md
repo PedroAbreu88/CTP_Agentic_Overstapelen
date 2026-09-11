@@ -31,6 +31,7 @@ untranslated throughout the code and documentation.
 | **Strekkenplein** | The floor area where strekkarren are staged and loaded. |
 | **HSC** | Home Shopping Centre. Either *manual* or *mechanised*. |
 | **Picking cart** | The cart a picker fills with crates. Mapped during picking, so the system knows which crates are on it. |
+| **Batch** | The unit of picking work a cart belongs to. Resolved from the same scan as the cart. Its relationship to a cart — one batch per cart, or several — is **not yet established**; see open question 7. |
 | **Reject lane** | Mechanised-HSC lane collecting crates that fell out of the automated flow. |
 | **Stickerfree** | The programme removing physical stickers from crates. Phase 2 is what creates the need for this app. |
 | **Finishing** / **Finisher** | What the operation itself calls overstapelen and the operator who performs it, in CWMS process language ("transfers totes from pick carts to delivery carts"). Search for both terms — material is filed under either. See `docs/operations-context.md`. |
@@ -63,12 +64,42 @@ particular crate, and one scan per cart rather than one per crate.
 
 Step 3 is a decision, not an obvious consequence — see
 [ADR 0004](decisions/0004-position-map-over-per-crate-scan.md). It is
-**Proposed**, pending floor observation. The trade it accepts: speed and
+**Accepted provisionally** as of 2026-09-11, on assumptions recorded in that
+ADR, pending the floor observation. The trade it accepts: speed and
 glanceability, at the cost of no per-crate audit trail and a dependency on
 crates staying in their picked positions.
 
 Applies to manual and mechanised HSCs. Most valuable in mechanised sites, and
 anywhere stickers are absent.
+
+### What the draft screen establishes
+
+![The draft position map](images/draft-position-map.png)
+
+The draft above is the origin of the position-map direction and the source of
+most of what we currently believe about screen 3. It is **not a design** —
+design is pending — but it is evidence of intent, so what it fixes is worth
+stating plainly:
+
+| Element | What the draft shows |
+| --- | --- |
+| Grid | **18 positions**, 3 rows × 6 columns |
+| Strek spread | **4 distinct streks** in the example (5, 6, 7, 9) |
+| Encoding | Colour **and** number per cell — colour groups, number decides |
+| Orientation | The cart drawn at the right edge, wheel and handle as the landmark |
+| Weight | A `> 10kg` legend, with a warning triangle on each affected position |
+| Actions | `← Close (P2)` and `→ Finished (P3)` in the button bar |
+
+Two consequences that are easy to miss:
+
+- **A position carries two attributes, not one.** Strek *and* weight. Any cell
+  design has to hold both, and the weight flag is a safety signal rather than
+  decoration — it tells the operator to expect a heavy lift before they take the
+  weight.
+- **`Finished (P3)` lives on the map itself.** Cart completion looks like an
+  action on this screen rather than a separate one, which may collapse screens 3
+  and 4 of `docs/phase-1-screens.md` into one. Unconfirmed, but it changes what
+  `Verify_load_carrier` is a model for.
 
 ## Phase 2 — the reject lane (mechanised HSC)
 
@@ -132,14 +163,15 @@ These block a meaningful estimate. None should be answered from a desk.
 
 `docs/operations-context.md` narrows #1, #2 and #5 using the operation's own
 process documentation, and identifies who owns the answer to #4. It closes none
-of them. #1 now has a *proposed* answer in `docs/decisions/`, which is a
-direction to test on the floor, not a closure.
+of them. #1 now has a *provisionally accepted* answer in `docs/decisions/`, which
+is a direction we have chosen to build against, not a direction anyone has
+checked on the floor.
 
-1. ~~**Scan every crate, or read a position map from one scan?**~~ **Direction
-   proposed — not yet confirmed.** [ADR 0004](decisions/0004-position-map-over-per-crate-scan.md)
-   proposes the position map. It is *Proposed* rather than *Accepted* because it
-   was settled by a draft design rather than by the floor observation this
-   question asks for. The observation that would confirm it: **do crates stay in
+1. ~~**Scan every crate, or read a position map from one scan?**~~ **Decided
+   provisionally.** [ADR 0004](decisions/0004-position-map-over-per-crate-scan.md)
+   is **Accepted** as of 2026-09-11, on five recorded assumptions. It was
+   accepted to unblock specification work, *not* because the evidence arrived.
+   The observation that confirms or reverses it is unchanged: **do crates stay in
    their picked positions between picking and the strekkenplein?**
 2. Which system is the authoritative source of the crate → strek assignment, and
    how is it read?
@@ -147,6 +179,18 @@ direction to test on the floor, not a closure.
 4. What is the agreed fallback when the app is unavailable?
 5. Which HSC is the pilot, and what baseline do we measure against?
 6. Is Phase 2 committed, or deferred until Phase 1 has floor data?
+7. **What is a batch, and how does it relate to a cart?** The scan resolves "the
+   pickcart, and the batch". One batch per cart, or several? Does the operator
+   ever need to see it? Raised 2026-09-11; nothing in this repository models it.
+8. **Where does the `> 10kg` weight flag come from?** The draft shows it per
+   position, so some upstream system holds a per-crate weight. Which one, and is
+   it reliable enough to put in front of an operator as a safety signal?
+9. **Is `Finished (P3)` on the map, or a separate confirmation screen?** The
+   draft puts it in the map's button bar. That may merge two screens, or it may
+   be shorthand in a sketch.
+10. **Is the manual HSC in Phase 1 at all?** The brief says the app applies to
+    both but is "most useful in mechanised ones, or anywhere there aren't any
+    stickers". Whether manual sites are in the pilot scope changes #5.
 
 ## Where things live
 

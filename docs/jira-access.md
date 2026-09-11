@@ -186,9 +186,86 @@ PR, and reference the document from the issue.
 
 ## Statuses
 
-There is **no "To Do"** status. New Story issues open in **`Backlog`**, which is
-the equivalent — its status category is `new`. The other new-category statuses
-are `Refinement` and `To Refine`.
+There is **no "To Do"** status for Story. New Story issues open in **`Backlog`**,
+which is the equivalent — its status category is `new`. The other new-category
+statuses are `Refinement` and `To Refine`.
+
+### Statuses are per issue type, and the difference bites
+
+**A Story cannot hold every status the board displays.** This is not a
+permissions problem and no amount of retrying fixes it — the workflow scheme
+gives different issue types entirely different status sets.
+
+| Issue type | Statuses available |
+| --- | --- |
+| Story, Task, Spike, Decision, Question | Backlog, Refinement, To Refine, Refined, Design, In Progress, To Test, Verify, Closed |
+| **Feature** | In Analysis, Review, Open, To Do, On Hold, Impediment, In Progress, Selected for Development, Development done, Closed |
+| **Epic** | Analysis, Discovery, Vision, Review One Pagers, Approved One Pagers, Ready, Implement, Done, Rejected |
+
+Read it rather than trusting the table — this is the authoritative endpoint, and
+it is the fastest way to answer "why can't I move this card there":
+
+```bash
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/api/2/project/AODB/statuses"
+```
+
+Two practical consequences:
+
+- **Dragging a card on the board is a workflow transition.** If the target
+  column's statuses are not in that issue type's workflow, the drop is rejected.
+  The card does not move and the error reads like a permissions failure.
+- **`/rest/api/2/issue/{key}/transitions` is the per-issue answer.** It lists
+  what *this* issue can reach right now. If a status is absent there, no API call
+  and no drag will reach it.
+
+### Changing issue type is not an escape hatch
+
+`editmeta` on an AODB Story reports `issuetype` with `Story` as its only allowed
+value, so a Story cannot be converted to a Feature through the edit API. The UI's
+*Move* operation is a different, more privileged path.
+
+## The board columns
+
+Board 24968's column → status mapping, read on 2026-09-11 **after** the
+`Needs Decision` column was adjusted to admit Stories:
+
+| Column | Statuses | Story can reach? |
+| --- | --- | --- |
+| Backlog | *(none mapped)* | — |
+| **Needs Decision** | `Backlog` (12204), `Analysis` (12710), `In Analysis` (14907) | ✅ via `Backlog` |
+| Todo Human | `To Do` (10500), `Impediment` (11101) | ❌ Feature-only |
+| Todo AI | `Open`, `On Hold`, `Refined`, `Refinement`, `To Refine`, `Review One Pagers`, `Discovery`, `Vision`, `Approved One Pagers` | ✅ |
+| Queued AI | `Review`, `Implement`, `Ready`, `Selected for Development` | ❌ |
+| Development AI | `Design`, `In Progress`, `To Test` | ✅ |
+| Preview AI | `Verify`, `Development done` | ✅ |
+| Canary AI | *(none mapped)* | — |
+| Production AI | `Done` | ❌ |
+| Canceled | `Closed`, `Rejected` | ✅ via `Closed` |
+
+**The consequence nobody expects: every new Story lands in `Needs Decision`.**
+New Stories open in `Backlog`, and `Backlog` is mapped to that column. Promoting
+one to `Todo AI` means transitioning it to `Refinement`, `To Refine` or
+`Refined`.
+
+That is arguably the right default — nothing becomes AI-actionable until a human
+has looked at it — but it is a behaviour change, not a display change, and it
+will surprise anyone who created an issue before 2026-09-11.
+
+**`Todo Human` remains unreachable for Stories.** Both its statuses are
+Feature-only, so a Story can say "needs a decision" but not "a human should do
+this". If that distinction starts mattering, the fix is either another column
+remap or a workflow-scheme change to add `To Do` to the Story workflow — the
+latter needs a Jira admin.
+
+The columns are also a lump of several workflows: `Todo AI` holds Epic statuses
+(`Vision`, `Discovery`) alongside Story ones. Read the live configuration rather
+than assuming the mapping is curated:
+
+```bash
+curl -s -u "you@ah.nl:$TOKEN" -H "Accept: application/json" \
+  "https://jira-eu-aholddelhaize.atlassian.net/rest/agile/1.0/board/24968/configuration"
+```
 
 ## Failure modes
 
@@ -200,3 +277,5 @@ are `Refinement` and `To Refine`.
 | `400 "NL CTP Team Name is required"` on edit | You tried to clear the team. It cannot be emptied; only an admin can relax the field configuration. |
 | Issue created but absent from the agentic board | Missing or misspelled `D&Aagenticteam` label, or a team outside the two the board's filter allows. |
 | Description renders as literal JSON | You posted ADF to v2, or a plain string to v3. |
+| A card will not drag into a column | That column's statuses are not in the issue type's workflow. Check `/project/AODB/statuses`, not permissions. |
+| A transition ID exists but returns `400` | Transitions are per-issue and per-status. Re-read `/issue/{key}/transitions` from the *current* status. |
