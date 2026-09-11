@@ -7,10 +7,11 @@ Derived by reading frames from the Figma designs file
 (`XMc8Glk3X9V3xh1uEiYoRe`), **last modified `2026-09-01T11:59:03Z`**. Regenerate
 the underlying reading with `./tools/figma-flow.sh <page pattern>`.
 
-> **Coverage is partial, deliberately.** Figma's API is rate-limited to a
-> handful of calls per week on the current seat (see `docs/figma-access.md`), so
-> this was built from the pages that mattered most. What is here was read from
-> the file; what is missing is named as missing rather than guessed.
+> **Coverage is partial, but no longer because of the API.** The seat was
+> upgraded on 2026-09-10 and the rate limit that shaped earlier sessions is
+> gone (see `docs/figma-access.md`). What remains missing is missing from the
+> **file**, not from our reading of it. Everything here was read from the file;
+> anything inferred is labelled as an inference.
 
 ## The physical buttons are part of the UI
 
@@ -54,7 +55,9 @@ the left; the **confirming or primary** choice is `P3` and sits on the right.
 
 ## Screen anatomy
 
-Every screen read so far is three stacked regions:
+Every **non-modal** screen read so far is three stacked regions. Modal
+interruptions are a separate anatomy — see [Interruptions are
+modal](#interruptions-are-modal-and-cover-the-button-bar).
 
 ```
 ┌─────────────────────────────────┐
@@ -101,6 +104,48 @@ For a message screen (illustration + text):
 so one, two or three actions are supported. Three buttons on a 534px screen
 leaves ~160px each — enough for a short Dutch label and no more.
 
+## Interruptions are modal, and cover the button bar
+
+The `↳ Break / Quit activity` page holds **24 frames across five flows**. Four
+of them appear once per NL/ENG × device size (16 frames); `Resume_activity`
+appears **twice** in each of those four combinations, for 8. The duplicates look
+like working copies rather than distinct states — worth confirming with design
+before treating either as canonical.
+
+| Flow | Purpose |
+| --- | --- |
+| `Freezer_check` | Confirm before entering or leaving the freezer |
+| `Quit/Break` | Choose between quitting and taking a break |
+| `Break_time` | Break in progress |
+| `Quit_confirmation` | Confirm quitting the activity |
+| `Resume_activity` | Return to an activity already in progress |
+
+**None of them use the three-region anatomy.** Each is a full-bleed
+` Overlay - Pantry` at the full screen size, with a dialog centred on top:
+
+| Component | Size at 534×320 | Used by |
+| --- | --- | --- |
+| `🧬 Dialog - Feedback` | 502×284 | `Freezer_check` |
+| `🧬 Dialog - Content` | 502×260 | `Quit/Break`, `Break_time` |
+| `🧬 Dialog - Content` | 502×204 | `Resume_activity` |
+| `🧬 Dialog - Feedback` | 502×252 | `Quit_confirmation` |
+
+So a dialog is **16px inset on each side** and sits over everything, including
+the 72px button bar. The button bar is therefore *not* a permanent fixture:
+when the app interrupts the operator, it takes the whole screen.
+
+Some variants carry explicit `Click area` nodes — `229×48` and `229×120` — in
+pairs. At 502px wide with a gap, `229` is a half-width target, so these are
+two-choice dialogs with touch targets far larger than the visible control. On a
+device operated with gloves that is the right instinct, and worth copying.
+
+**Caution: several of these screens use deprecated components.**
+`🧬 Dialog - Content [OLD]` and `🧬 Dialog - Feedback [OLD]` appear in
+`Quit_confirmation` and `Resume_activity`, while `docs/design-system.md` records
+`[OLD]` as a hard do-not-use. The designs file is mid-migration and the two
+sources disagree. Do not copy an `[OLD]` variant into new work; ask design which
+is current before building an interruption screen.
+
 ## Screens are bilingual
 
 Every screen exists as a **NL** and an **ENG** variant — `Continue_message_NL`
@@ -115,11 +160,48 @@ Observed copy is short, sentence case, and question-led:
 
 Note the register: informal *je*, not *u*. Match it.
 
+### The agreed terminology
+
+The `↳ Content guidelines` page carries a small NL/ENG glossary. It is the only
+terminology guidance in the file, so use exactly these words rather than
+synonyms:
+
+| ENG | NL |
+| --- | --- |
+| Division | Divisie |
+| Aisle | Pad |
+| Chilled | Koel |
+| Quantity | Aantal |
+| Items | Items |
+
+And one formatting rule, quoted verbatim:
+
+> *"Amounts are always written with a period and no euro sign (f.e. 8.10)"*
+
+That is the whole page. **There is no documented tone or length guidance**, so
+the register described above remains an inference from four observed strings,
+not a stated rule. Worth asking design to write it down.
+
+Note that these terms are picking vocabulary — none of the overstapelen domain
+(`strek`, `strekkar`, `strekkenplein`, see `docs/product-context.md`) appears
+anywhere in the design file. New terms will need agreeing with design, and the
+NL/ENG pairing above is the pattern they should follow.
+
 ## Both device sizes are designed
 
 Screens are drawn at **534×320 and 640×360**, not one with the other derived.
 A proposal should say which it targets, and design for 534×320 first — it is
 the tighter budget and the button bar does not shrink to help.
+
+The `↳ Devices and frame size` page states the two sizes and nothing else of
+substance — but it **contradicts the screens on one measurement**. It draws the
+status bar at `534×24`; every actual screen in the file uses `534×16`. At 640
+both agree on `21`.
+
+**Trust the screens, not the spec page**: 16px is what every 534-wide screen we
+have read actually uses, and it is
+what the anatomy table above records. Eight pixels of content budget hang on
+this, so it is worth having design correct whichever is stale.
 
 ## What is not designed yet
 
@@ -127,38 +209,63 @@ Read from the file, so this is absence rather than oversight on our part:
 
 | Page | State |
 | --- | --- |
+| `00. System states` | **Empty** — no children at all |
 | `03. Picking` | **Empty** — no frames |
 | `↳ Select division` | **Empty** — no frames |
 | `↳ Continue with picking` | 4 screens (NL/ENG × both sizes) |
 
-The Picking flow that overstapelen is meant to sit alongside is **largely
-undrawn**. Only the "continue where you left off?" interruption screen exists.
+Two absences matter more than the rest.
 
-That cuts both ways: there is less precedent to follow than assumed, and
-correspondingly more room to propose — but a proposal cannot claim to match an
-existing Picking screen that does not exist.
+**The Picking flow is largely undrawn.** Only the "continue where you left off?"
+interruption screen exists. That cuts both ways: there is less precedent to
+follow than assumed, and correspondingly more room to propose — but a proposal
+cannot claim to match an existing Picking screen that does not exist.
 
-## Still unread
+**`00. System states` is empty, and that is a gap in the product, not the
+documentation.** It was expected to hold the error toast and warning states.
+`docs/product-context.md` lists *"the floor does not stop"* as a
+non-negotiable constraint — if the app is unavailable or wrong, a defined
+fallback must already exist. **No error or degraded state has been designed for
+any Armscanner flow.** Anyone proposing overstapelen screens is proposing the
+first ones, and should say so rather than assume a house style exists.
 
-Blocked on the API rate limit, not on difficulty. In rough priority order:
+The library does hold `Toast - Nadine` (4 variants) and `Toast - Pantry`, so the
+components exist; what is missing is any screen showing when and how they are
+used.
 
-- `00. System states` — error toast, warning. Directly serves the "floor does
-  not stop" constraint.
-- `↳ Break / Quit activity` — how interruption is handled.
-- `↳ Content guidelines` — the tone and length rules, rather than inferring
-  them from four strings as above.
-- `↳ Devices and frame size` — already partly known (the two sizes), may carry
-  more.
+## Everything named here has now been read
 
-Fetch with `./tools/figma-flow.sh '00. System states|Break|Content guidelines'`
-when the rate limit allows.
+The pages previously listed as unread were fetched on 2026-09-10, after the seat
+upgrade lifted the rate limit. `00. System states` turned out to be empty and
+`↳ Content guidelines` turned out to be much smaller than hoped; both findings
+are recorded above.
+
+One caveat about the tooling, learned in the process:
+**`./tools/figma-flow.sh` only reports frames matching a device size**
+(534×320 or 640×360). `↳ Content guidelines` holds two off-size frames —
+`Glossary` and `Other` — and the tool printed nothing for that page, which looks
+exactly like an empty page. A silent page is not necessarily an empty one;
+confirm with `/v1/files/:key/nodes?ids=<page>&depth=2` before concluding
+anything is absent.
 
 ## Open questions for design
 
+- **Which dialog components are current?** `Quit_confirmation` and
+  `Resume_activity` use `🧬 Dialog - Content [OLD]` and
+  `🧬 Dialog - Feedback [OLD]`, which the library marks deprecated. One of the
+  two sources is wrong.
+- **Is the status bar 16px or 24px at 534?** The screens say 16, the
+  `↳ Devices and frame size` page says 24.
+- **Who designs the error and warning states?** `00. System states` is empty,
+  and "the floor does not stop" needs an answer before overstapelen ships.
 - **Does the WT6300 share the WT6400's `P1`/`P2`/`P3` mapping?** The file
   documents only the WT6400.
 - **Is the Picking flow undrawn or drawn elsewhere?** Two of its three pages are
   empty.
+- **Is there tone and length guidance anywhere?** `↳ Content guidelines` holds
+  only a five-term glossary and a number-formatting rule.
+- **What are the agreed NL/ENG terms for the overstapelen domain?** `strek`,
+  `strekkar` and `strekkenplein` appear nowhere in the design file.
 - **What is the overstapelen task icon?** The library has ~30 task types —
   Picking, Counting, Mutating, Emballage and so on — and none for overstapelen,
   strek or transfer. A new icon is a lead-time item.
