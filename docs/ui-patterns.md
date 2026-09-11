@@ -182,10 +182,13 @@ That is the whole page. **There is no documented tone or length guidance**, so
 the register described above remains an inference from four observed strings,
 not a stated rule. Worth asking design to write it down.
 
-Note that these terms are picking vocabulary — none of the overstapelen domain
-(`strek`, `strekkar`, `strekkenplein`, see `docs/product-context.md`) appears
-anywhere in the design file. New terms will need agreeing with design, and the
-NL/ENG pairing above is the pattern they should follow.
+Note that these terms are picking vocabulary. The overstapelen domain is
+**partly** covered: `↳ Adding products to orders` supplies `kar` (cart),
+`karren` (carts), `ladingdrager` (load carrier), `karoverzicht` (cart overview)
+and `inhoud` (contents), all in the informal register. What is still undefined
+anywhere in the file is the overstapelen-specific vocabulary — `strek`,
+`strekkar`, `strekkenplein` (see `docs/product-context.md`). Those need agreeing
+with design, and the NL/ENG pairing above is the pattern they should follow.
 
 ## Both device sizes are designed
 
@@ -210,10 +213,83 @@ a `↳` prefix marks a child page by naming convention only. A section header li
 `00. System states` or `03. Picking` has **zero children**, and that is normal —
 its content lives in the `↳` pages listed after it.
 
-We got this wrong once, at real cost: `00. System states` was reported here as
-an undesigned gap, when its two child pages hold 20 screens between them. If a
-section page looks empty, look at the pages beneath it before drawing a
-conclusion.
+Worse, **the section names are not reliable either.** The picking flow is not
+under `03. Picking` — that section is nearly empty. It is under `09. N/A`, as
+`↳ Collect products`, with 66 screens. A section called `N/A` holds the single
+most relevant flow in the file.
+
+We got this wrong twice, both times expensively: `00. System states` was
+reported here as an undesigned gap when its two child pages hold 20 screens, and
+the picking flow was reported as largely undrawn when it has 66. **Never
+conclude something is absent from a section page's name or child count.** Search
+the whole file for the screen you expect, then look at what is around it.
+
+## The cart flow already exists
+
+This is the most directly relevant precedent in the file, and it went unread for
+weeks. `↳ Adding products to orders` contains a complete load-carrier flow:
+
+| Screen | NL title | Composition at 534×320 |
+| --- | --- | --- |
+| `Cart_overview` | *Karoverzicht* | `🧬 List item - Regular` 486×72 |
+| `Select_cart` | *Selecteer een kar* | `🧬 List item - Regular` 486×72 |
+| `View_contents` | *Overzicht van inhoud* | `🧬 Product Card List` 486×96 |
+| `Verify_load_carrier` | *Inhoud ladingdrager* | `🧬 Checkbox` 486×48, `🧬 Divider`, `🧬 Product Card List` 486×96 |
+
+Observed copy, both languages at equal fidelity:
+
+- `"Karoverzicht"` / `"Cart overview"` — *"Bekijk en selecteer de kar met items
+  die je aan bestellingen wilt toevoegen."*
+- `"Selecteer een kar"` / `"Select a cart"` — *"Er zijn meerdere karren met
+  hetzelfde product beschikbaar."*
+
+### The house pattern for cart contents is a list, not a grid
+
+**This bears directly on [ADR 0004](decisions/0004-position-map-over-per-crate-scan.md).**
+The design system's existing answer to *"show me what is on this load carrier"*
+is a **vertical list of full-width rows**, 486 wide and 72 or 96 tall, with a
+checkbox to confirm. Not a spatial map.
+
+At 232px of content that is **two to three rows visible**, so the list scrolls.
+A position map trades that scrolling for glanceability — which may well be the
+right trade for an arm-mounted screen, but it is now a trade **against an
+existing pattern** rather than a choice in a vacuum. ADR 0004 was written
+believing no alternative was drawn. One is, and it is drawn in Dutch.
+
+`Verify_load_carrier` is worth studying before specifying our cart-complete
+screen: it is already the "confirm what is on this carrier" interaction, with a
+checkbox rather than a button as the confirming control.
+
+## Tiles, onboarding and list density
+
+Three more patterns worth knowing, all previously unrecorded.
+
+**Tiles exist, three across.** `Select_next_step` — *"What do you want to do
+next?"* — uses `🧬 Tile - Pantry` at **154×156, three in a row**. So a tile grid
+is house style, but the established form is a single row of three, not a matrix.
+
+**Every flow has a three-screen onboarding.** `Onboarding_1/2/3` appear in both
+`↳ Collect products` and `↳ Adding products to orders`, composed of a 145×145
+illustration and `_🖇️Pagination - Pantry` at 32×8. Given a workforce that is
+~92% flex and continuously onboarded, this is a pattern overstapelen should
+almost certainly reuse rather than skip. Note the pagination component, which is
+what `P1` is bound to.
+
+**List item sizes are a fixed vocabulary:**
+
+| Component | Height at 534 | Seen in |
+| --- | --- | --- |
+| `🧬 List item - Image (S)` | 486×64 | `Activity_detail` |
+| `🧬 List item - Regular` | 486×72 | `Cart_overview`, `Select_cart` |
+| `🧬 Product Card List` | 486×96 | `View_contents`, `Verify_load_carrier` |
+
+All are 486 wide — a 24px inset each side, matching the content region padding.
+Three 64px rows fit the 232px budget; two 96px rows do.
+
+The main picking screen, `Collect_default`, composes `🧬 Quantity Stepper`
+215×48, two `🧬 Tag 1.1` chips and a `🧬 Button - Icon` 48×48 under the heading
+*"Collecting products / Scan or add manually"* — useful as the reference for
+what a dense working screen looks like here.
 
 ## Error and warning states exist
 
@@ -276,26 +352,34 @@ invent a tile, and should ask design what these states were drawn for.
 
 ## What is not designed yet
 
-Read from the file, so this is absence rather than oversight on our part:
+Confirmed by node count, not inferred from a silent page:
 
 | Page | State |
 | --- | --- |
-| `↳ Select division` | **Empty** — no frames |
-| `↳ Continue with picking` | 4 screens (NL/ENG × both sizes) |
-| `↳ N/A` (Splitting) | Named as not applicable |
+| `↳ Splash` | **Empty** — zero children |
+| `↳ Login` | **Empty** — zero children |
+| `↳ App logo` | **Empty** — zero children |
+| `🔀 User flow` (top level) | **Empty** — zero children |
+| `↳ Select division` (under `03. Picking`) | **Empty** — but see below |
+| `↳ ` (unnamed, under `00. Flow name`) | **Empty** — a template stub |
 
-**The Picking flow is largely undrawn.** Only the "continue where you left off?"
-interruption screen exists. That cuts both ways: there is less precedent to
-follow than assumed, and correspondingly more room to propose — but a proposal
-cannot claim to match an existing Picking screen that does not exist.
+**`↳ Select division` being empty is misleading.** A `Select_division` screen
+does exist — in `↳ Collect products`, along with the rest of the picking flow.
+The empty page under `03. Picking` is an abandoned placeholder, not a gap.
 
-## Everything named here has now been read
+So the honest summary is the opposite of what this document said until
+2026-09-11: **overstapelen has substantial precedent to match.** Picking,
+cart selection, load-carrier verification, onboarding, errors and interruptions
+are all drawn. What is genuinely absent is anything showing crates positioned
+*spatially* on a cart, and any state for a backend outage.
 
-The pages previously listed as unread were fetched on 2026-09-10, after the seat
-upgrade lifted the rate limit. `↳ Content guidelines` turned out to be much
-smaller than hoped; the error and warning pages turned out to exist after all.
+## Everything in this file has now been read
 
-Two caveats about the tooling, both learned the hard way:
+All pages were read on 2026-09-10 and 2026-09-11, after the seat upgrade lifted
+the rate limit. Roughly 220 screens were found in pages previously recorded as
+unread or absent.
+
+Three caveats about the tooling, all learned the hard way:
 
 **`./tools/figma-flow.sh` only reports frames matching a device size**
 (534×320 or 640×360). `↳ Content guidelines` holds two off-size frames —
@@ -304,8 +388,21 @@ exactly like an empty page. A silent page is not necessarily an empty one;
 confirm with `/v1/files/:key/nodes?ids=<page>&depth=2` before concluding
 anything is absent.
 
+**The size tolerance is tight enough to miss real screens.** `↳ N/A` under
+`03. Splitting` holds a frame at **536×302** — two pixels and eighteen pixels
+off the 534×320 target — which the tool skipped. It also holds wide flow
+diagrams at 3398×560 that are deliberately not screens.
+
+**`Documentation components` and `Thumbnail` are not documentation you want.**
+The first is a template stub (`Title`, `Body text`, `native scanning sound`),
+the second is the file's 1600×960 cover image.
+
 ## Open questions for design
 
+- **Should the position map be a map at all?** `Verify_load_carrier` already
+  solves "confirm what is on this carrier" as a scrolling list with a checkbox.
+  A spatial map is a deliberate departure from that, and needs justifying rather
+  than assuming. See ADR 0004.
 - **Which dialog components are current?** `Quit_confirmation` and
   `Resume_activity` use `🧬 Dialog - Content [OLD]` and
   `🧬 Dialog - Feedback [OLD]`, which the library marks deprecated. One of the

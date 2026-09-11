@@ -31,30 +31,46 @@ interruption to it.
 
 | # | Screen | Purpose | Status |
 | --- | --- | --- | --- |
-| 1 | **Scan prompt** | Resting state. Tells the operator to scan any crate on the cart. | **Ready** |
+| 1 | **Scan prompt** | Resting state. Tells the operator to scan any crate on the cart. | **Ready** — `Collect_default` is the model |
 | 2 | **Scanning / resolving** | Feedback between scan and answer. May be sub-second and not a screen at all. | **Ready** |
 | 3 | **Position map** | The cart drawn as positions, each showing its strek. The core screen. | **Blocked** — ADR 0004 unconfirmed, *and* cart geometry |
-| 4 | **Cart complete** | Confirms the cart is empty and returns to (1). | **Ready** |
+| 4 | **Cart complete** | Confirms the cart is empty and returns to (1). | **Ready** — `Verify_load_carrier` is the model |
 | 5 | **Unknown crate** | Scanned crate resolves to no cart. | **Ready** — follow the error toast |
 | 6 | **Wrong cart** | Scanned crate belongs to a different cart than the one in progress. | **Ready** — follow the error toast |
 | 7 | **Cart already done** | The cart was already emptied, by this operator or another. | **Blocked** — needs a product decision |
 | 8 | **Backend unavailable** | What the operator sees when the app cannot answer. | **Blocked** — open question 4 |
 | 9 | **Interruptions** | Break, quit, resume, freezer check. | **Ready** — reuse, do not invent |
+| 10 | **Onboarding** | Three-screen introduction, shown on first use. | **Ready** — house pattern, see below |
 
-Six of nine are ready to specify. The three that are not are the ones that
+Seven of ten are ready to specify. The three that are not are the ones that
 matter: the position map is the product, and screens 7 and 8 are the difference
 between an app the floor trusts and one it works around.
+
+**Screen 10 was not in the first version of this list, and should have been.**
+Every flow in the designs file ships `Onboarding_1/2/3` — a three-screen
+carousel with a 145×145 illustration and `_🖇️Pagination - Pantry`, paged with
+`P1`. Against a workforce that is ~92% flex with continuous onboarding, and a
+constraint that says training cannot be a dependency, skipping this would be a
+deliberate departure from house style. It is also entirely unblocked.
 
 ## What each blocker actually is
 
 ### Screen 3 — an unconfirmed decision, and two numbers nobody has
 
-**First, this screen may not be the right screen at all.** ADR 0004 is
-*Proposed*, not *Accepted*. It is confirmed or reversed by observing whether
-crates stay in their picked positions between picking and the strekkenplein. If
-they do not, option (c) — a confirming scan per strekkar — becomes the design,
-and option (a) is the safe retreat. Cart dimensions do not unblock this screen
-on their own.
+**First, this screen may not be the right screen at all** — and there are now
+two reasons rather than one.
+
+ADR 0004 is *Proposed*, not *Accepted*. It is confirmed or reversed by observing
+whether crates stay in their picked positions between picking and the
+strekkenplein. If they do not, option (c) — a confirming scan per strekkar —
+becomes the design, and option (a) is the safe retreat.
+
+**And the design system already answers a nearby question differently.**
+`Verify_load_carrier` confirms the contents of a load carrier as a scrolling
+list with a checkbox, not a spatial map. The map may still be right — *where a
+crate goes* is a different question from *what is on the cart*, and only the
+first needs to be glanceable — but it is now a departure from an established
+pattern, and any proposal has to say why the list is insufficient.
 
 **Second, two numbers.** How many positions does a picking cart have, and how
 many streks does a cart typically span? Neither is recorded anywhere in this
@@ -109,15 +125,26 @@ process we have not defined.
 
 ## What can be done now, and why it is worth doing
 
-Screens 1, 2, 4, 5, 6 and 9 do not depend on cart geometry or on ADR 0004 being
-confirmed. They are the frame around the map: how the operator starts, how they
-know the app heard them, what happens when a scan is wrong, how they finish, and
-what happens when they take a break.
+Screens 1, 2, 4, 5, 6, 9 and 10 do not depend on cart geometry or on ADR 0004
+being confirmed. They are the frame around the map: how the operator learns the
+flow, starts it, knows the app heard them, recovers from a bad scan, finishes,
+and takes a break.
 
-Specifying them has a second benefit. They exercise the conventions — physical
-key bindings, bilingual copy, the 232px budget, the modal interruption pattern —
-against a real flow, which is the cheapest way to find out whether
-`docs/ui-patterns.md` is actually sufficient to design from.
+**Almost all of them now have a named model to copy**, which was not true when
+this document was first written:
+
+| Screen | Follow |
+| --- | --- |
+| 1 Scan prompt | `Collect_default` — heading plus *"Scan or add manually"* |
+| 4 Cart complete | `Verify_load_carrier` — contents plus a confirming checkbox |
+| 5, 6 Scan errors | `🧬 Toast` / `🧬 Toast with location` in the bottom region |
+| 9 Interruptions | `↳ Break / Quit activity`, reused wholesale |
+| 10 Onboarding | `Onboarding_1/2/3`, three screens paged with `P1` |
+
+That changes the nature of the specification work. It is now mostly **matching
+an existing flow**, not inventing one — which is faster, far easier for design
+to review, and much less likely to produce something the floor rejects as
+unfamiliar.
 
 Screen 9 should be **reuse, not design**. `↳ Break / Quit activity` already
 draws break, quit, resume and freezer-check for both device sizes. The only open
@@ -156,6 +183,11 @@ For design:
    including on the `↳ Warning` screens themselves?
 8. What were `Load Carrier`'s `To map` / `Mapped` / `Not to map` states drawn
    for, and does a cart-mapping screen exist anywhere we have not looked?
+9. **Why is a position map better than `Verify_load_carrier`?** Design has
+   already solved "confirm the contents of a load carrier" as a list. We should
+   be able to answer this before proposing a map.
+10. What are the agreed NL/ENG terms for `strek`, `strekkar` and
+    `strekkenplein`? `kar` and `ladingdrager` are already established.
 
 For Operations:
 

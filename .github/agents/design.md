@@ -122,6 +122,15 @@ and for stacked half crates `Mapped Up`, `Mapped Down`, `Mapped Full`,
 of identical cells**, so do not design one; and cart-mapping vocabulary already
 exists, so a position map should extend this set rather than introduce a tile.
 
+**There is already a load-carrier flow — study it before proposing.**
+`↳ Adding products to orders` contains `Cart_overview` (*Karoverzicht*),
+`Select_cart` (*Selecteer een kar*), `View_contents` (*Overzicht van inhoud*)
+and `Verify_load_carrier` (*Inhoud ladingdrager*). The last one answers "confirm
+what is on this carrier" with a **list of 486-wide rows plus a checkbox**, not a
+spatial map. If you propose a map, say explicitly why the list is insufficient —
+"there is no precedent" is false. `kar` and `ladingdrager` are the established
+Dutch terms; use them.
+
 **Use the agreed words, and flag the ones that do not exist yet.** The
 `↳ Content guidelines` page fixes five NL/ENG pairs — Division/Divisie,
 Aisle/Pad, Chilled/Koel, Quantity/Aantal, Items/Items — and one rule: amounts
@@ -170,7 +179,8 @@ library has moved and the extract should be regenerated before you rely on it.
 
 **A warning about reading the designs file.** Its page list is flat, and a `↳`
 prefix marks a child page by convention only. Section headers such as
-`00. System states` have zero children — that is normal, not a gap. We once
-recorded "no error states exist" on exactly that basis, when two child pages
-held 20 screens. Look beneath a section page before concluding anything is
-missing.
+`00. System states` have zero children — that is normal, not a gap. **The
+section names are unreliable too**: the entire picking flow, 66 screens, sits
+under a section called `09. N/A`. We have twice recorded something as "not
+designed" on this basis and been wrong. Search the whole file for the screen you
+expect before concluding it is absent.
