@@ -101,24 +101,28 @@ generation. If it is adopted, record the reasoning here and say what changed.
 
 ### What changed, 2026-09-11 — and why the decision still stands
 
-Two of the three reasons above have expired. Recording that honestly, because a
+One of the three reasons above has expired outright, and the list turns out to
+have been missing something important. Recording that honestly, because a
 decision defended by obsolete arguments gets re-litigated badly.
 
-**The MCP server can now write.** It is no longer a read-oriented convenience:
-an agent connected to it can create and edit frames, components, variables and
-layouts directly in a file. This matters because it is the **only** way an agent
-writes to Figma. The REST API has no endpoint for creating canvas content at any
-token scope — a personal access token with every permission still cannot draw a
-frame. The alternatives are MCP, or a plugin that a human runs in the editor.
+**Expired — the seat cliff.** The *6 tool calls per month* cap applied to View
+and Collab seats. The account moved to a Dev/Full seat on 2026-09-10, so the
+rate-limit bullet no longer applies to us at all.
 
-Do not repeat the mistake made in this session of concluding "REST cannot write,
-therefore agents cannot write". Those are different statements.
+**Still true, but narrower than it reads — "the REST API is inspectable".** It
+is, and it still fails in obvious ways. What that bullet never claimed, and what
+is false, is that REST is *sufficient*: **the MCP server can now write, and REST
+cannot.** A connected agent creates and edits frames, components, variables and
+layouts directly in a file, while the REST API has no endpoint for creating
+canvas content at any token scope — a personal access token with every
+permission still cannot draw a frame. The only routes are MCP, or a plugin that
+a human runs in the editor.
 
-**The seat cliff is gone.** The *6 tool calls per month* cap applied to View and
-Collab seats. The account moved to a Dev/Full seat on 2026-09-10, so that
-argument no longer applies to us.
+Do not repeat the mistake made in this session of reasoning from "REST cannot
+write" to "agents cannot write". Those are different statements, and the second
+one is wrong.
 
-**The third reason survives, and it is the one that decides this.** MCP is
+**Survives, and decides this — the configuration argument.** MCP is
 per-developer environment configuration living outside the repository. It cannot
 be reviewed in a pull request, and one person's working setup does not transfer
 to anyone else. For a project whose main product is currently *documents that
