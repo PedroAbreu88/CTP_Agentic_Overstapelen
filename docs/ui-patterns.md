@@ -106,8 +106,11 @@ leaves ~160px each — enough for a short Dutch label and no more.
 
 ## Interruptions are modal, and cover the button bar
 
-The `↳ Break / Quit activity` page holds **24 screens** — five flows, each as
-NL/ENG × both device sizes:
+The `↳ Break / Quit activity` page holds **24 frames across five flows**. Four
+of them appear once per NL/ENG × device size (16 frames); `Resume_activity`
+appears **twice** in each of those four combinations, for 8. The duplicates look
+like working copies rather than distinct states — worth confirming with design
+before treating either as canonical.
 
 | Flow | Purpose |
 | --- | --- |

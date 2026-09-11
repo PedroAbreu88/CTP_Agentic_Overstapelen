@@ -179,16 +179,20 @@ The app fits the existing platform. Nothing here needs new infrastructure.
 
 > [!WARNING]
 > **The screen description above still contains guesswork.** It was composed
-> against a _partial_ reading of the Armscanner Figma library, and the gaps are
-> known rather than hidden.
+> against a reading of the Armscanner Figma library that is now complete for the
+> pages that matter, and the gaps below are gaps in the **design file itself**
+> rather than in our reading of it.
 
-- The Figma API is **rate-limited to a handful of calls per week** on the current seat, so the library was read selectively. _System states_ (error and warning handling), _Break / Quit activity_ and _Content guidelines_ have **not** been read -- so error, interruption and copy-tone conventions are inferred, not sourced.
+- The _System states_ page in Figma is **empty** -- no error or warning states have been designed for any Armscanner flow, so error and degraded-state handling is unsourced because it does not yet exist. This is the same gap as open question 4 (the agreed fallback when the app is unavailable), seen from the design side.
+- _Break / Quit activity_ and _Content guidelines_ **have now been read**. Interruptions are modal overlays that cover the button bar, and the only documented copy guidance is a five-term NL/ENG glossary plus a number-formatting rule -- so **copy tone remains an inference**, not a sourced convention.
 - The `P1`/`P2`/`P3` button mapping is documented in Figma for the **WT6400 only**. Its application to the WT6300 is an inference and needs confirming with design.
 - The Picking flow this sits alongside is **largely undrawn** in Figma, so there is less existing precedent to match than assumed.
 - The library has **no overstapelen task icon** -- roughly 30 task types exist and none covers overstapelen, strek or transfer. A new icon is a **lead-time item** worth starting early.
 
 Treat the screen as **structurally indicative**. Expect visual detail to change
-once the remaining library pages are read and design has reviewed it.
+once design has reviewed it -- and note that any error or degraded state shown
+would be the **first designed for the Armscanner**, so it needs design's
+agreement rather than ours alone.
 
 ## Suggested next steps
 

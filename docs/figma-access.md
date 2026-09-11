@@ -43,7 +43,8 @@ expected content, confirm with:
 
 ```bash
 # Does the page really have no children, or just no device-sized frames?
-curl -s -H "X-Figma-Token: $TOKEN" \
+# Uses the same $FIGMA_TOKEN as the scripts; see Storing the token below.
+curl -s -H "X-Figma-Token: $FIGMA_TOKEN" \
   "https://api.figma.com/v1/files/XMc8Glk3X9V3xh1uEiYoRe/nodes?ids=17:4&depth=2"
 ```
 
@@ -245,7 +246,7 @@ That is the only reliable route, and at 13 KB it is cheap.
 | `404` on a file | Wrong file key — check for a copied URL fragment or a `branch` key. |
 | `403` on `/variables/local` | Needs an Enterprise plan **and** a Dev or Full seat. Since the 2026-09-10 seat upgrade this **may now succeed** — untested. If it does, it is the authoritative source for raw token values. |
 | Empty `components` list | Wrong file — you queried the designs file, not the library. |
-| `429 Rate limit exceeded` | Should no longer occur since the 2026-09-10 seat upgrade. If it does, the seat has changed — read the `retry-after` header, which is authoritative and has been as long as **3.4 days**. See [Rate limits](#rate-limits). |
+| `429 Rate limit exceeded` | A Dev or Full seat still has ordinary **per-minute** limits, so a burst can throttle — read `retry-after` and wait it out. But a `retry-after` measured in **days** is the old low-seat failure mode, not a burst: check `x-figma-rate-limit-type`, and if it says `low` the seat has changed. See [Rate limits](#rate-limits). |
 
 ## What the designs are for
 
