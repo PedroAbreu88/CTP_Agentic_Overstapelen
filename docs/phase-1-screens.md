@@ -33,7 +33,7 @@ interruption to it.
 | --- | --- | --- | --- |
 | 1 | **Scan prompt** | Resting state. Tells the operator to scan any crate on the cart. | **Ready** |
 | 2 | **Scanning / resolving** | Feedback between scan and answer. May be sub-second and not a screen at all. | **Ready** |
-| 3 | **Position map** | The cart drawn as positions, each showing its strek. The core screen. | **Blocked** — cart geometry |
+| 3 | **Position map** | The cart drawn as positions, each showing its strek. The core screen. | **Blocked** — ADR 0004 unconfirmed, *and* cart geometry |
 | 4 | **Cart complete** | Confirms the cart is empty and returns to (1). | **Ready** |
 | 5 | **Unknown crate** | Scanned crate resolves to no cart. | **Blocked** — no error precedent |
 | 6 | **Wrong cart** | Scanned crate belongs to a different cart than the one in progress. | **Blocked** — no error precedent |
@@ -47,10 +47,18 @@ between an app the floor trusts and one it works around.
 
 ## What each blocker actually is
 
-### Screen 3 — two numbers nobody has
+### Screen 3 — an unconfirmed decision, and two numbers nobody has
 
-**How many positions does a picking cart have, and how many streks does a cart
-typically span?** Neither is recorded anywhere in this repository.
+**First, this screen may not be the right screen at all.** ADR 0004 is
+*Proposed*, not *Accepted*. It is confirmed or reversed by observing whether
+crates stay in their picked positions between picking and the strekkenplein. If
+they do not, option (c) — a confirming scan per strekkar — becomes the design,
+and option (a) is the safe retreat. Cart dimensions do not unblock this screen
+on their own.
+
+**Second, two numbers.** How many positions does a picking cart have, and how
+many streks does a cart typically span? Neither is recorded anywhere in this
+repository.
 
 They are not detail. At 8 positions the map is glanceable at a distance; at 18
 the strek numbers stop being readable within the 232px content region, and
