@@ -13,9 +13,14 @@ Read these first, every time:
 - `docs/ui-patterns.md` — how screens are composed. The grammar to the above
   vocabulary: screen anatomy, density budget, physical button bindings.
 - `docs/product-context.md` — what the app is for, and the Dutch glossary.
+- `docs/phase-1-screens.md` — the Phase 1 screen inventory. Which screens exist
+  to be designed, which are ready to specify, and which are blocked. Start here
+  when asked to "propose designs", so you work on something that is actually
+  unblocked.
 - `docs/figma-access.md` — how to read Figma directly when the extract is not
-  enough. **Note the rate limit is days, not minutes** — read the committed
-  documents first.
+  enough. The seat was upgraded on 2026-09-10, so the API is usable normally —
+  but **read the committed documents first anyway**, because they are faster,
+  reviewed, and record things the raw file does not.
 
 ## Scope
 
@@ -39,7 +44,13 @@ specification and let it implement.
 - **Budget the screen.** The button bar is a fixed **72px** on both sizes and
   the status bar takes 16px, leaving **232px** of content at 534×320. Two
   buttons are 245px each; three leave ~160px, which is a short Dutch label and
-  nothing more.
+  nothing more. (The `↳ Devices and frame size` page claims a 24px status bar;
+  every actual screen uses 16. Trust the screens.)
+- **Interruptions are modal and take the whole screen.** Break, quit, freezer
+  check and resume are full-bleed ` Overlay - Pantry` with a dialog centred on
+  top, 16px inset each side, covering the button bar. The three-region anatomy
+  applies to non-modal screens only — do not assume the button bar is always
+  present.
 - **Write Dutch and English.** Every screen is designed in both at the same
   fidelity. Use the informal *je*, not *u*. Keep copy short and question-led.
 - **The device is worn on the arm.** Both of the operator's hands are lifting
@@ -49,7 +60,11 @@ specification and let it implement.
 - **Gloves, cold, speed.** Large targets. No hover, no fine pointing, no small
   dismissables.
 - **The floor does not stop.** Every proposal must say what the operator sees
-  when the backend is unavailable.
+  when the backend is unavailable. **Be aware you are inventing this.** The
+  `00. System states` page in Figma is empty — no error, warning or degraded
+  state has been designed for *any* Armscanner flow. `Toast - Nadine` and
+  `Toast - Pantry` exist as components, but nothing shows when or how they are
+  used. Say explicitly that you are proposing the first of its kind.
 
 ## Rules that keep proposals honest
 
@@ -74,6 +89,12 @@ use:
 - Anything on a library page marked `❌`. Confirmed with design: ❌ means no
   longer applicable. The extract flags these as `[RETIRED]`.
 
+**Copying a screen is not a defence.** The designs file itself still uses
+`🧬 Dialog - Content [OLD]` and `🧬 Dialog - Feedback [OLD]` in
+`Quit_confirmation` and `Resume_activity`. The file is mid-migration, so "the
+existing screen does it" does not make a retired component acceptable. Name the
+current equivalent, and flag the contradiction as a question for design.
+
 The retirements have a logic worth understanding rather than memorising:
 **standalone form controls are out, list-item and numpad equivalents are in.**
 A bare checkbox is a small target needing precise aim; a full-width list row is
@@ -93,6 +114,18 @@ and do not treat it as endorsement either.
 picking, which already exists as a flow. Extend it; do not invent a parallel
 vocabulary.
 
+**Use the agreed words, and flag the ones that do not exist yet.** The
+`↳ Content guidelines` page fixes five NL/ENG pairs — Division/Divisie,
+Aisle/Pad, Chilled/Koel, Quantity/Aantal, Items/Items — and one rule: amounts
+take a period and no euro sign (`8.10`). Use them exactly. **No overstapelen
+term is defined**: `strek`, `strekkar` and `strekkenplein` appear nowhere in the
+design file, so any label using them is a proposal to design, not a given. Offer
+the NL/ENG pair in the same style and mark it as needing agreement.
+
+Note also that there is **no documented tone or length guidance**. The informal
+*je*, question-led register is an inference from a handful of observed strings.
+Follow it, but do not cite it as a rule.
+
 **Say when you do not know.** The extract records *what exists and what it is
 called*. It does not record why a pattern was chosen, how a component behaves in
 detail, or whether it suits overstapelen. When a question needs that, say so and
@@ -109,8 +142,21 @@ library has moved and the extract should be regenerated before you rely on it.
 
 `docs/product-context.md` lists six. Two bear directly on UI:
 
-1. **Scan every crate, or read a position map from one scan?** Unanswered, and
-   it drives the entire interaction. Do not settle it in a proposal — if a design
-   depends on the answer, present both or say which you assumed.
+1. **Scan every crate, or read a position map from one scan?**
+   [ADR 0004](../../docs/decisions/0004-position-map-over-per-crate-scan.md)
+   proposes the position map, but its status is **Proposed, not Accepted** —
+   pending floor observation of whether crates stay in their picked positions.
+
+   Read that ADR before designing the map screen. It records that the direction
+   was set by a draft screen rather than by evidence, which is exactly the trap
+   to avoid repeating: **a detailed drawing makes an unconfirmed decision look
+   settled.** If a design depends on the answer, say which option you assumed
+   and what would change under the other.
+
+   Two facts nobody has established, and both change the screen completely:
+   **how many positions a picking cart has**, and **how many streks a cart
+   typically spans**. Do not silently assume either.
 2. **What is the agreed fallback when the app is unavailable?** Until it exists,
-   say what you would show and mark it as needing agreement.
+   say what you would show and mark it as needing agreement. See also the empty
+   `00. System states` page above — this question and that gap are the same hole
+   from two sides.
