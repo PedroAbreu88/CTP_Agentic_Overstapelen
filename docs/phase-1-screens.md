@@ -1,13 +1,22 @@
 # Phase 1 — the screen inventory
 
 What screens overstapelen needs, what each is for, and which are blocked on
-something. **This is a scoping document, not a design.** It deliberately
-contains no layouts, no component choices and no copy.
+something. **This is a scoping document, not a design.**
+
+Scope, stated precisely, because the line matters: this document **does not
+compose screens** — no layouts, no arrangement, no proposed wording. It **does**
+name existing screens and components to follow, with their dimensions, where the
+design system has already answered the question. Citing `Verify_load_carrier` as
+the model for confirming a cart is scoping; deciding what our version looks like
+is design, and belongs in a specification rather than here.
 
 That restraint is the point. [ADR 0004](decisions/0004-position-map-over-per-crate-scan.md)
 records that the position-map direction was set by a draft screen rather than by
 floor observation, and warns that a drawing makes an unconfirmed decision look
 settled. Listing the screens is useful now; drawing them mostly is not.
+
+Any observed copy quoted below is **evidence from the file**, recording what
+design already writes. It is not proposed wording for our screens.
 
 Read with `docs/product-context.md` for the domain and `docs/ui-patterns.md` for
 how Armscanner screens are composed.
