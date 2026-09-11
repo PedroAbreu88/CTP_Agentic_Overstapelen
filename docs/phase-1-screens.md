@@ -35,14 +35,14 @@ interruption to it.
 | 2 | **Scanning / resolving** | Feedback between scan and answer. May be sub-second and not a screen at all. | **Ready** |
 | 3 | **Position map** | The cart drawn as positions, each showing its strek. The core screen. | **Blocked** — ADR 0004 unconfirmed, *and* cart geometry |
 | 4 | **Cart complete** | Confirms the cart is empty and returns to (1). | **Ready** |
-| 5 | **Unknown crate** | Scanned crate resolves to no cart. | **Blocked** — no error precedent |
-| 6 | **Wrong cart** | Scanned crate belongs to a different cart than the one in progress. | **Blocked** — no error precedent |
-| 7 | **Cart already done** | The cart was already emptied, by this operator or another. | **Blocked** — needs a decision |
+| 5 | **Unknown crate** | Scanned crate resolves to no cart. | **Ready** — follow the error toast |
+| 6 | **Wrong cart** | Scanned crate belongs to a different cart than the one in progress. | **Ready** — follow the error toast |
+| 7 | **Cart already done** | The cart was already emptied, by this operator or another. | **Blocked** — needs a product decision |
 | 8 | **Backend unavailable** | What the operator sees when the app cannot answer. | **Blocked** — open question 4 |
 | 9 | **Interruptions** | Break, quit, resume, freezer check. | **Ready** — reuse, do not invent |
 
-Nine, of which four are ready and five are blocked — and the blocked ones are
-not evenly weighted. Screen 3 is the product; screens 5–8 are the difference
+Six of nine are ready to specify. The three that are not are the ones that
+matter: the position map is the product, and screens 7 and 8 are the difference
 between an app the floor trusts and one it works around.
 
 ## What each blocker actually is
@@ -72,34 +72,47 @@ cart from the same end?** ADR 0004 names cart orientation as
 correctness-critical, because a mirrored map is wrong in a way that looks
 entirely plausible.
 
-### Screens 5–7 — there is no error precedent to follow
+### Screens 5–7 — the error convention already exists
 
-The `00. System states` page in Figma is **empty**. No error, warning or
-degraded state has been designed for any Armscanner flow, so whoever specifies
-these is proposing the first of their kind. `Toast - Nadine` and `Toast -
-Pantry` exist as components; nothing shows when or how they are used.
+An earlier draft of this document said there was no error precedent. That was
+wrong, and the mistake is instructive: `00. System states` is a **section
+header** with no children, and its content lives in the `↳ Error toast` and
+`↳ Warning` pages listed beneath it. There are 20 screens between them.
 
-This needs design's involvement rather than ours alone. It is a house-style
-decision with consequences well beyond overstapelen.
+The convention is two-tier, and screens 5 and 6 should follow it rather than
+invent anything:
 
-Screen 7 additionally needs a **product** decision, not a design one: if a cart
-is already marked done, is that an error, a warning, or simply information? The
-answer depends on whether two operators can work the same strekkenplein at once,
-which nobody has confirmed.
+- **`🧬 Toast`** in the bottom region, 518×56 at 534 (80 for two lines), for a
+  recoverable error the operator corrects and continues past. A
+  `🧬 Toast with location` variant pairs an `attention` icon with
+  `Product location - Pantry`, so the error can say *where to go* — directly
+  useful for "this crate belongs to the cart over there".
+- **`🧬 Dialog - Feedback`** as a modal, 502×284, for something that must be
+  acknowledged before continuing.
+
+Screen 5 (unknown crate) and screen 6 (wrong cart) are both recoverable, so both
+are toasts, and both are specifiable now.
+
+Screen 7 still needs a **product** decision, not a design one: if a cart is
+already marked done, is that recoverable (toast) or must it be acknowledged
+(modal)? The answer depends on whether two operators can work the same
+strekkenplein at once, which nobody has confirmed.
 
 ### Screen 8 — the same hole as open question 4
 
 `docs/product-context.md` asks what the agreed fallback is when the app is
-unavailable, and lists *"the floor does not stop"* as non-negotiable. Until
-Operations agrees the fallback, this screen cannot be specified — it is a
-screen that describes a process we have not defined.
+unavailable, and lists *"the floor does not stop"* as non-negotiable. The
+toast/warning split above covers a **bad scan**; a backend outage is a different
+failure, and nothing in the file addresses it. Until Operations agrees the
+fallback, this screen cannot be specified — it is a screen that describes a
+process we have not defined.
 
 ## What can be done now, and why it is worth doing
 
-Screens 1, 2, 4 and 9 do not depend on cart geometry or on ADR 0004 being
+Screens 1, 2, 4, 5, 6 and 9 do not depend on cart geometry or on ADR 0004 being
 confirmed. They are the frame around the map: how the operator starts, how they
-know the app heard them, how they finish, and what happens when they take a
-break.
+know the app heard them, what happens when a scan is wrong, how they finish, and
+what happens when they take a break.
 
 Specifying them has a second benefit. They exercise the conventions — physical
 key bindings, bilingual copy, the 232px budget, the modal interruption pattern —
@@ -137,9 +150,12 @@ For the floor visit:
 
 For design:
 
-6. Who owns the error and degraded-state house style, given `00. System states`
-   is empty?
-7. Which dialog components are current, given `[OLD]` variants are in use?
+6. Does the toast/warning convention extend to a **backend outage**, or does
+   that need a third treatment?
+7. Which dialog components are current, given `[OLD]` variants are in use —
+   including on the `↳ Warning` screens themselves?
+8. What were `Load Carrier`'s `To map` / `Mapped` / `Not to map` states drawn
+   for, and does a cart-mapping screen exist anywhere we have not looked?
 
 For Operations:
 

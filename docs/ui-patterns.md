@@ -203,44 +203,100 @@ have read actually uses, and it is
 what the anatomy table above records. Eight pixels of content budget hang on
 this, so it is worth having design correct whichever is stale.
 
+## Section pages are empty by design
+
+**Read this before concluding anything is missing.** The page list is flat, and
+a `↳` prefix marks a child page by naming convention only. A section header like
+`00. System states` or `03. Picking` has **zero children**, and that is normal —
+its content lives in the `↳` pages listed after it.
+
+We got this wrong once, at real cost: `00. System states` was reported here as
+an undesigned gap, when its two child pages hold 20 screens between them. If a
+section page looks empty, look at the pages beneath it before drawing a
+conclusion.
+
+## Error and warning states exist
+
+They live under `00. System states`, in two child pages, and they establish a
+clear two-tier convention.
+
+**`↳ Error toast` — 12 screens, all `Product_error` NL/ENG × both sizes.** A
+toast in the **bottom** region over a full-bleed ` Overlay - Pantry`:
+
+| Component | Size at 534 |
+| --- | --- |
+| `🧬 Toast` | 518×56, or 518×80 for two lines |
+| `🧬 Toast with location` | 518×56 |
+
+518 is 8px inset each side. The `with location` variant composes an `attention`
+icon (24×24) with `Product location - Pantry` (125×24), so an error can point at
+*where* to go, not only what went wrong. Observed copy: `"Incorrect product
+scanned: return to"` followed by the location component.
+
+**`↳ Warning` — 8 screens, all `Warning_message` NL/ENG × both sizes.** A modal
+`🧬 Dialog - Feedback` at 502×284 or 502×252, same overlay-plus-dialog anatomy
+as the interruptions.
+
+The division is the useful part: **a toast for a recoverable error the operator
+corrects and continues past; a modal warning for something that must be
+acknowledged.** Note that the warning screens use the `[OLD]` dialog variant, so
+confirm the current component before copying.
+
+## The cart is already modelled in the library
+
+`Load Carrier` is a **23-variant component set** that describes crates on a
+carrier, and it is the closest thing to a position map that already exists.
+
+| Axis | Values |
+| --- | --- |
+| `Type` | `Whole crate`, `Whole crate 2`, `Whole crate small 2`, `Half crate`, `Half crate 2`, `Bag front`, `Bag top` |
+| `State` | `To map`, `Mapped`, `Not to map` — plus, for `Half crate 2`: `Mapped Up`, `Mapped Down`, `Mapped Up Scan down`, `Mapped Down Scan up`, `Mapped Full` |
+
+Three things follow, and they matter more than the component itself.
+
+**A cart position is not uniformly "one crate".** Positions hold whole crates,
+half crates and bags, and half crates stack two high — which is what
+`Mapped Up` / `Mapped Down` / `Mapped Full` encode. Any position map that
+assumes a uniform grid of identical cells is assuming something the design
+system already contradicts.
+
+**`To map` / `Mapped` / `Not to map` is cart-mapping vocabulary that already
+exists.** That is Phase 2's problem — mapping a cart while loading it from the
+reject lane — modelled before we asked for it. It is also evidence that the
+`Not to map` case is real: some positions are deliberately excluded.
+
+**`Mapped Up Scan down` implies a per-position scanning interaction**, where one
+half of a stacked position is confirmed and the other is being scanned. That is
+close to ADR 0004's option (c), the confirming-scan fallback. Worth understanding
+before assuming option (b) is the only designed-for route.
+
+None of this confirms how many positions a cart has — that still needs the
+floor. But it does mean a proposal should extend `Load Carrier` rather than
+invent a tile, and should ask design what these states were drawn for.
+
 ## What is not designed yet
 
 Read from the file, so this is absence rather than oversight on our part:
 
 | Page | State |
 | --- | --- |
-| `00. System states` | **Empty** — no children at all |
-| `03. Picking` | **Empty** — no frames |
 | `↳ Select division` | **Empty** — no frames |
 | `↳ Continue with picking` | 4 screens (NL/ENG × both sizes) |
-
-Two absences matter more than the rest.
+| `↳ N/A` (Splitting) | Named as not applicable |
 
 **The Picking flow is largely undrawn.** Only the "continue where you left off?"
 interruption screen exists. That cuts both ways: there is less precedent to
 follow than assumed, and correspondingly more room to propose — but a proposal
 cannot claim to match an existing Picking screen that does not exist.
 
-**`00. System states` is empty, and that is a gap in the product, not the
-documentation.** It was expected to hold the error toast and warning states.
-`docs/product-context.md` lists *"the floor does not stop"* as a
-non-negotiable constraint — if the app is unavailable or wrong, a defined
-fallback must already exist. **No error or degraded state has been designed for
-any Armscanner flow.** Anyone proposing overstapelen screens is proposing the
-first ones, and should say so rather than assume a house style exists.
-
-The library does hold `Toast - Nadine` (4 variants) and `Toast - Pantry`, so the
-components exist; what is missing is any screen showing when and how they are
-used.
-
 ## Everything named here has now been read
 
 The pages previously listed as unread were fetched on 2026-09-10, after the seat
-upgrade lifted the rate limit. `00. System states` turned out to be empty and
-`↳ Content guidelines` turned out to be much smaller than hoped; both findings
-are recorded above.
+upgrade lifted the rate limit. `↳ Content guidelines` turned out to be much
+smaller than hoped; the error and warning pages turned out to exist after all.
 
-One caveat about the tooling, learned in the process:
+Two caveats about the tooling, both learned the hard way:
+
 **`./tools/figma-flow.sh` only reports frames matching a device size**
 (534×320 or 640×360). `↳ Content guidelines` holds two off-size frames —
 `Glossary` and `Other` — and the tool printed nothing for that page, which looks
@@ -256,8 +312,9 @@ anything is absent.
   two sources is wrong.
 - **Is the status bar 16px or 24px at 534?** The screens say 16, the
   `↳ Devices and frame size` page says 24.
-- **Who designs the error and warning states?** `00. System states` is empty,
-  and "the floor does not stop" needs an answer before overstapelen ships.
+- **Who designs the error and warning states?** Answered — they exist, see
+  above. What is *not* answered is whether the toast/warning split covers a
+  backend outage, which is a different kind of failure from a bad scan.
 - **Does the WT6300 share the WT6400's `P1`/`P2`/`P3` mapping?** The file
   documents only the WT6400.
 - **Is the Picking flow undrawn or drawn elsewhere?** Two of its three pages are

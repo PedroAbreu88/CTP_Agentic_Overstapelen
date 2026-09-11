@@ -183,16 +183,15 @@ The app fits the existing platform. Nothing here needs new infrastructure.
 > pages that matter, and the gaps below are gaps in the **design file itself**
 > rather than in our reading of it.
 
-- The _System states_ page in Figma is **empty** -- no error or warning states have been designed for any Armscanner flow, so error and degraded-state handling is unsourced because it does not yet exist. This is the same gap as open question 4 (the agreed fallback when the app is unavailable), seen from the design side.
+- Error and warning states **do exist** in Figma, under _System states_: a bottom toast for recoverable errors (including a variant that points at a location) and a modal dialog for warnings that must be acknowledged. An earlier version of this document said they did not exist; that was our error in reading the file, not a gap in the design. What remains genuinely open is whether that two-tier split covers a **backend outage**, which is a different failure from a bad scan -- see open question 4.
+- The library already models the cart: `Load Carrier` has 23 variants covering whole crates, half crates and bags, with `To map` / `Mapped` / `Not to map` states. Cart positions are therefore **not** a uniform grid of identical cells, and any position map should extend this component rather than invent one.
 - _Break / Quit activity_ and _Content guidelines_ **have now been read**. Interruptions are modal overlays that cover the button bar, and the only documented copy guidance is a five-term NL/ENG glossary plus a number-formatting rule -- so **copy tone remains an inference**, not a sourced convention.
 - The `P1`/`P2`/`P3` button mapping is documented in Figma for the **WT6400 only**. Its application to the WT6300 is an inference and needs confirming with design.
 - The Picking flow this sits alongside is **largely undrawn** in Figma, so there is less existing precedent to match than assumed.
 - The library has **no overstapelen task icon** -- roughly 30 task types exist and none covers overstapelen, strek or transfer. A new icon is a **lead-time item** worth starting early.
 
 Treat the screen as **structurally indicative**. Expect visual detail to change
-once design has reviewed it -- and note that any error or degraded state shown
-would be the **first designed for the Armscanner**, so it needs design's
-agreement rather than ours alone.
+once design has reviewed it.
 
 ## Suggested next steps
 

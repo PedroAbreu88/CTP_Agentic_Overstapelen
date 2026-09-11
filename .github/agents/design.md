@@ -60,11 +60,12 @@ specification and let it implement.
 - **Gloves, cold, speed.** Large targets. No hover, no fine pointing, no small
   dismissables.
 - **The floor does not stop.** Every proposal must say what the operator sees
-  when the backend is unavailable. **Be aware you are inventing this.** The
-  `00. System states` page in Figma is empty — no error, warning or degraded
-  state has been designed for *any* Armscanner flow. `Toast - Nadine` and
-  `Toast - Pantry` exist as components, but nothing shows when or how they are
-  used. Say explicitly that you are proposing the first of its kind.
+  when the backend is unavailable. There **is** an error convention to follow —
+  `↳ Error toast` and `↳ Warning` under `00. System states` — so use it: a
+  `🧬 Toast` in the bottom region for a recoverable error the operator corrects
+  and continues past, a modal `🧬 Dialog - Feedback` for something that must be
+  acknowledged. A **backend outage** is not covered by either; if you propose
+  one, say you are inventing it.
 
 ## Rules that keep proposals honest
 
@@ -114,6 +115,13 @@ and do not treat it as endorsement either.
 picking, which already exists as a flow. Extend it; do not invent a parallel
 vocabulary.
 
+**`Load Carrier` is the one to know.** Its 23 variants model crates on a cart —
+`Type=` whole crate, half crate, bag; `State=` `To map`, `Mapped`, `Not to map`,
+and for stacked half crates `Mapped Up`, `Mapped Down`, `Mapped Full`,
+`Mapped Up Scan down`. Two consequences: **cart positions are not a uniform grid
+of identical cells**, so do not design one; and cart-mapping vocabulary already
+exists, so a position map should extend this set rather than introduce a tile.
+
 **Use the agreed words, and flag the ones that do not exist yet.** The
 `↳ Content guidelines` page fixes five NL/ENG pairs — Division/Divisie,
 Aisle/Pad, Chilled/Koel, Quantity/Aantal, Items/Items — and one rule: amounts
@@ -157,6 +165,12 @@ library has moved and the extract should be regenerated before you rely on it.
    **how many positions a picking cart has**, and **how many streks a cart
    typically spans**. Do not silently assume either.
 2. **What is the agreed fallback when the app is unavailable?** Until it exists,
-   say what you would show and mark it as needing agreement. See also the empty
-   `00. System states` page above — this question and that gap are the same hole
-   from two sides.
+   say what you would show and mark it as needing agreement. The error toast and
+   warning conventions cover a bad scan, not an outage.
+
+**A warning about reading the designs file.** Its page list is flat, and a `↳`
+prefix marks a child page by convention only. Section headers such as
+`00. System states` have zero children — that is normal, not a gap. We once
+recorded "no error states exist" on exactly that basis, when two child pages
+held 20 screens. Look beneath a section page before concluding anything is
+missing.
