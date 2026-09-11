@@ -99,6 +99,41 @@ Recording why, so the choice is not silently re-litigated:
 The MCP server remains a reasonable option later, particularly for Dev Mode code
 generation. If it is adopted, record the reasoning here and say what changed.
 
+### What changed, 2026-09-11 — and why the decision still stands
+
+Two of the three reasons above have expired. Recording that honestly, because a
+decision defended by obsolete arguments gets re-litigated badly.
+
+**The MCP server can now write.** It is no longer a read-oriented convenience:
+an agent connected to it can create and edit frames, components, variables and
+layouts directly in a file. This matters because it is the **only** way an agent
+writes to Figma. The REST API has no endpoint for creating canvas content at any
+token scope — a personal access token with every permission still cannot draw a
+frame. The alternatives are MCP, or a plugin that a human runs in the editor.
+
+Do not repeat the mistake made in this session of concluding "REST cannot write,
+therefore agents cannot write". Those are different statements.
+
+**The seat cliff is gone.** The *6 tool calls per month* cap applied to View and
+Collab seats. The account moved to a Dev/Full seat on 2026-09-10, so that
+argument no longer applies to us.
+
+**The third reason survives, and it is the one that decides this.** MCP is
+per-developer environment configuration living outside the repository. It cannot
+be reviewed in a pull request, and one person's working setup does not transfer
+to anyone else. For a project whose main product is currently *documents that
+other people rely on*, that is disqualifying.
+
+**Decision unchanged: we do not use the MCP server.** Reviewed on 2026-09-11
+with the facts above and deliberately left as it was.
+
+If we later need an agent to produce design rather than read it, the option to
+reach for **first** is a Figma plugin committed to `tools/`. A plugin is code in
+the repository: reviewable in a pull request, runnable by anyone on the team,
+and versioned with everything else. It needs the Figma **desktop app**, which is
+the only way to load a local plugin — the browser has no `Plugins → Development`
+menu. That cost is real, but it buys back the property the MCP route gives up.
+
 ## Authentication
 
 A **personal access token**, sent as an `X-Figma-Token` header. Create one at
