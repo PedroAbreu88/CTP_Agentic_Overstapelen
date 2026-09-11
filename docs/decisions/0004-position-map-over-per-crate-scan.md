@@ -128,3 +128,50 @@ the seam, so the correction stays small.
 screen and the interaction model, but not the data model — the cart manifest is
 the same read either way. That is the main thing keeping this decision
 affordable to get wrong, and it is worth preserving deliberately.
+
+## New evidence, 2026-09-11 — an existing pattern we did not know about
+
+This ADR was written believing the position map had no precedent in the design
+system to be measured against. **That was wrong**, and the evidence arrived
+after the decision was recorded, so it is appended here rather than rewritten
+into the reasoning above.
+
+`↳ Adding products to orders` in the Armscanner designs file contains a complete
+load-carrier flow, in Dutch and English at equal fidelity:
+
+| Screen | NL title |
+| --- | --- |
+| `Cart_overview` | *Karoverzicht* |
+| `Select_cart` | *Selecteer een kar* |
+| `View_contents` | *Overzicht van inhoud* |
+| `Verify_load_carrier` | *Inhoud ladingdrager* |
+
+**`Verify_load_carrier` is the same question this ADR asks** — how does an
+operator confirm what is on a load carrier? — and it answers it as a **scrolling
+list of full-width rows with a checkbox**, not as a spatial map. Rows are 486
+wide and 72 or 96 tall, so two to three are visible in the 232px content region.
+
+This does not reverse the decision, and it should not be read as doing so. The
+argument for the map is unchanged: a list of crate identities is not glanceable
+between lifts, and the operator's problem is *where a crate goes*, not *what is
+on the cart*. Those are different questions, and the existing pattern answers
+the other one.
+
+What it does change is the standard of proof. Option (b) is now a **departure
+from an established pattern** rather than the only available shape, so:
+
+- The floor observation should also ask whether operators would accept a list.
+  If crates are handled one at a time and read individually, the existing pattern
+  may simply be correct, and cheaper.
+- Any proposal for the map must say explicitly why `Verify_load_carrier` is not
+  sufficient. "There was no precedent" is no longer available as a reason.
+- `Load Carrier` in the component library already models crates on a carrier —
+  23 variants, whole and half crates and bags, with `To map` / `Mapped` /
+  `Not to map` states, and `Mapped Up` / `Mapped Down` / `Mapped Full` for half
+  crates that stack two high. **Cart positions are therefore not a uniform grid
+  of identical cells.** Any map must extend this component rather than invent a
+  tile, and the stacking states in particular have no equivalent in a flat grid.
+
+The `Mapped Up Scan down` variant is worth understanding before treating option
+(b) as settled: it describes a per-position scanning interaction, which is closer
+to option (c) than to (b). Someone has already drawn part of the fallback.
